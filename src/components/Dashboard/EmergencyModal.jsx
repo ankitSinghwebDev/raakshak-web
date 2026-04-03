@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import { db, ref, get, set } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
 import './EmergencyModal.css'
@@ -79,7 +80,7 @@ const EmergencyModal = ({ open, onClose }) => {
   const handleSave = async (e) => {
     e.preventDefault()
     if (!formData.iceContact1 || !formData.relation || formData.bloodGroup === 'Select' || !formData.age) {
-      alert('Please fill all required fields')
+      toast.error('Please fill all required fields')
       return
     }
 
@@ -96,11 +97,11 @@ const EmergencyModal = ({ open, onClose }) => {
         medicines: formData.medicines,
         updatedAt: new Date().toISOString(),
       })
-      alert('Emergency data saved successfully!')
+      toast.success('Emergency data saved successfully!')
       onClose()
     } catch (err) {
       console.error('Error saving emergency data:', err)
-      alert('Failed to save. Please try again.')
+      toast.error('Failed to save. Please try again.')
     } finally {
       setSaving(false)
     }

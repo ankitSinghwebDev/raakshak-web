@@ -1,7 +1,8 @@
-import React from 'react'
+import useTranslation from '../../i18n/useTranslation'
 import './SuccessModal.css'
 
 const SuccessModal = ({ open, onClose, data }) => {
+  const { t } = useTranslation()
   if (!open || !data) return null
 
   const { generatedId, vehicleNum, qrUrl } = data
@@ -9,16 +10,12 @@ const SuccessModal = ({ open, onClose, data }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="success-modal-content glass-effect" onClick={(e) => e.stopPropagation()}>
-        <h2 className="success-title">Registration Successful!</h2>
+        <h2 className="success-title">{t('successTitle')}</h2>
 
-        {/* Sticker Preview */}
         <div className="final-sticker-preview">
           <div className="sticker-top">
             <div className="sticker-logo">
-              <img
-                src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png"
-                alt="Rakshak Logo"
-              />
+              <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak Logo" />
             </div>
             <div className="sticker-title">
               <h3>SCAN TO<br />INFORM OWNER</h3>
@@ -32,15 +29,14 @@ const SuccessModal = ({ open, onClose, data }) => {
           </div>
         </div>
 
-        {/* User ID */}
         <div className="user-id-box">
-          <p className="user-id-label">YOUR UNIQUE RAKSHAK ID</p>
+          <p className="user-id-label">{t('successYourId')}</p>
           <h2 className="user-id-value">{generatedId}</h2>
         </div>
 
-        <p className="success-msg">Aapka QR code link ho chuka hai.</p>
+        <p className="success-msg">{t('successQRLinked')}</p>
 
-        <button className="btn-done" onClick={onClose}>DONE</button>
+        <button className="btn-done" onClick={onClose}>{t('successDone')}</button>
       </div>
     </div>
   )

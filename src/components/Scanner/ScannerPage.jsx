@@ -73,13 +73,15 @@ const ScannerPage = () => {
 
   const handleWrongParking = () => {
     if (!userData) return
-    const contactNum = userData.emergency?.iceContact1 || userData.whatsapp || userData.mobile
-    const msg = `🚨 RAKSHAK PARKING ALERT 🚨\n\nVehicle: ${userData.vehicle}\nOwner: ${userData.name}\n\nYour vehicle is causing a parking issue. Please move it as soon as possible.\n\n— Sent via Rakshak QR Scan`
+    // Parking alerts go to OWNER's WhatsApp/mobile — not emergency contact
+    const contactNum = userData.whatsapp || userData.mobile
+    const msg = `🚨 RAKSHAK PARKING ALERT 🚨\n\nVehicle: ${userData.vehicle}\n\nYour vehicle is causing a parking issue. Please move it as soon as possible.\n\n— Sent via Rakshak QR Scan`
     sendWhatsApp(contactNum, msg)
   }
 
   const handleAccidentAlert = () => {
     if (!userData) return
+    // Accident/Emergency alerts go to ICE contact first
     const contactNum = userData.emergency?.iceContact1 || userData.whatsapp || userData.mobile
     const emergency = userData.emergency || {}
     const medicalInfo = [

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { RAZORPAY_KEY, COMPARISON_TABLE } from '../../utils/constants'
 import { db, ref, update } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
@@ -67,11 +68,11 @@ const UpgradePlanModal = ({ open, onClose }) => {
             plan: newPlan,
           })
 
-          alert('Upgrade successful! Premium tools are now unlocked.')
+          toast.success('Upgrade successful! Premium tools unlocked.')
           handleClose()
         } catch (err) {
           console.error('Upgrade error:', err)
-          alert('Database error! Payment ID: ' + response.razorpay_payment_id)
+          toast.error('Database error! Payment ID: ' + response.razorpay_payment_id)
         } finally {
           setProcessing(false)
         }

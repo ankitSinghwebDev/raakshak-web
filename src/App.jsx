@@ -1,4 +1,6 @@
 import { ConfigProvider, theme } from 'antd'
+import { HelmetProvider } from 'react-helmet-async'
+import { Toaster } from 'react-hot-toast'
 import { AppProvider, useAppContext } from './context/AppContext'
 import AppRouter from './router/AppRouter'
 import RegistrationModal from './components/Auth/RegistrationModal'
@@ -79,26 +81,45 @@ function GlobalModals() {
 
 function App() {
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.darkAlgorithm,
-        token: {
-          colorPrimary: '#F28C38',
-          borderRadius: 10,
-          fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
-        },
-      }}
-    >
-      <ErrorBoundary>
-        <AppProvider>
-          <div className="app bg-darkBg min-h-screen">
-            <AppRouter>
-              <GlobalModals />
-            </AppRouter>
-          </div>
-        </AppProvider>
-      </ErrorBoundary>
-    </ConfigProvider>
+    <HelmetProvider>
+      <ConfigProvider
+        theme={{
+          algorithm: theme.darkAlgorithm,
+          token: {
+            colorPrimary: '#F28C38',
+            borderRadius: 10,
+            fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+          },
+        }}
+      >
+        <ErrorBoundary>
+          <AppProvider>
+            <div className="app bg-darkBg min-h-screen">
+              <AppRouter>
+                <GlobalModals />
+              </AppRouter>
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  duration: 3000,
+                  style: {
+                    background: '#151515',
+                    color: '#fff',
+                    border: '1px solid rgba(242, 140, 56, 0.2)',
+                    borderRadius: '14px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    padding: '14px 20px',
+                  },
+                  success: { iconTheme: { primary: '#00c853', secondary: '#000' } },
+                  error: { iconTheme: { primary: '#ff4d4d', secondary: '#000' } },
+                }}
+              />
+            </div>
+          </AppProvider>
+        </ErrorBoundary>
+      </ConfigProvider>
+    </HelmetProvider>
   )
 }
 

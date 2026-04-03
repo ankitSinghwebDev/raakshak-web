@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { db, ref, get, query, orderByChild, equalTo } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
 import useBodyLock from '../../hooks/useBodyLock'
+import useTranslation from '../../i18n/useTranslation'
 import './LoginModal.css'
 
 const LoginModal = ({ open, onClose }) => {
   useBodyLock(open)
+  const { t } = useTranslation()
   const [mobile, setMobile] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -23,7 +25,7 @@ const LoginModal = ({ open, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (mobile.length !== 10) {
-      setError('Please enter a valid 10-digit mobile number')
+      setError(t('loginErrorInvalid'))
       return
     }
 
@@ -51,11 +53,11 @@ const LoginModal = ({ open, onClose }) => {
         handleClose()
         navigate('/dashboard')
       } else {
-        setError('Mobile number not registered. Please register first.')
+        setError(t('loginErrorNotFound'))
       }
     } catch (err) {
       console.error('Login Error:', err)
-      setError('Connection error. Please try again.')
+      setError(t('loginErrorConnection'))
     } finally {
       setLoading(false)
     }
@@ -68,14 +70,14 @@ const LoginModal = ({ open, onClose }) => {
       <div className="login-modal-content glass-effect" onClick={(e) => e.stopPropagation()}>
         <span className="close-btn" onClick={handleClose}>&times;</span>
         <div className="login-icon">🔐</div>
-        <h2 className="login-title">Welcome <span className="text-orange">Back</span></h2>
-        <p className="login-subtitle">HAR GAADI KA GUARDIAN</p>
+        <h2 className="login-title">{t('loginWelcome')} <span className="text-orange">{t('loginBack')}</span></h2>
+        <p className="login-subtitle">{t('brandTagline')}</p>
 
         <form onSubmit={handleSubmit} autoComplete="off">
           <div className="login-input-container">
             <input
               type="text"
-              placeholder="REGISTERED MOBILE"
+              placeholder={t('loginPlaceholder')}
               maxLength={10}
               value={mobile}
               onChange={(e) => {
@@ -93,9 +95,9 @@ const LoginModal = ({ open, onClose }) => {
             className="btn-login-submit"
             disabled={loading}
           >
-            {loading ? 'Verifying...' : 'Sign In To Dashboard ➔'}
+            {loading ? t('loginVerifying') : t('loginSubmit')}
           </button>
-          <p className="login-footer-text">Protected by Rakshak Encryption</p>
+          <p className="login-footer-text">{t('loginFooter')}</p>
         </form>
       </div>
     </div>

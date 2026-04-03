@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import './ServiceInquiryModal.css'
 
 const ServiceInquiryModal = ({ open, onClose, serviceType }) => {
@@ -61,7 +62,7 @@ const ServiceInquiryModal = ({ open, onClose, serviceType }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     // TODO: Save to Firebase
-    alert('Request submitted successfully! We will contact you soon.')
+    toast.success('Request submitted successfully!')
     handleClose()
   }
 

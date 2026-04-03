@@ -82,16 +82,41 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 280px;
+  width: 300px;
+  max-width: 85vw;
   height: 100%;
   height: 100dvh;
   background: #0a0a0a;
+  border-left: 1px solid rgba(242, 140, 56, 0.1);
   z-index: 1001;
-  padding: 70px 20px 30px;
+  padding: 24px 20px 30px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   animation: menuSlideIn 0.25s ease-out;
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(242, 140, 56, 0.15);
+}
+
+.mobile-menu-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.mobile-menu-brand {
+  color: #F28C38;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
 }
 
 @keyframes menuSlideIn {
@@ -147,6 +172,24 @@
 .mobile-link.highlight-link {
   color: #F28C38;
   font-weight: 900;
+}
+
+.mobile-lang-select {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(242, 140, 56, 0.08);
+  border: 1px solid rgba(242, 140, 56, 0.2);
+  border-radius: 12px;
+  color: #F28C38;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.mobile-lang-select option {
+  background: #111;
+  color: #fff;
 }
 
 /* ===== SHARED BUTTON STYLES ===== */

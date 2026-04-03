@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import { db, ref, get, set } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
 import './SmartVaultModal.css'
@@ -79,7 +80,7 @@ const SmartVaultModal = ({ open, onClose }) => {
       setScreen('auth')
       setPin('')
       setConfirmPin('')
-      alert('Vault PIN created successfully!')
+      toast.success('Vault PIN created successfully!')
     } catch (err) {
       console.error('Setup error:', err)
       setError('Failed to create PIN. Try again.')

@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import './LoginModal.css'
 
 const SupportTicketModal = ({ open, onClose }) => {
@@ -14,7 +15,7 @@ const SupportTicketModal = ({ open, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     // TODO: Send support ticket to Firebase or email
-    alert('Ticket submitted! We will get back to you soon.')
+    toast.success('Ticket submitted! We will get back to you soon.')
     handleClose()
   }
 

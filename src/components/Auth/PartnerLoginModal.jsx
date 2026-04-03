@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import './LoginModal.css'
 
 const PartnerLoginModal = ({ open, onClose }) => {
@@ -14,7 +15,7 @@ const PartnerLoginModal = ({ open, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     // TODO: Integrate partner authentication
-    alert('Partner Dashboard coming soon!')
+    toast('Partner Dashboard coming soon!')
   }
 
   if (!open) return null

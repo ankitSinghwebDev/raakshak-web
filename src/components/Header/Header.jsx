@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { MenuOutlined, CloseOutlined } from '@ant-design/icons'
 import useBodyLock from '../../hooks/useBodyLock'
+import useTranslation from '../../i18n/useTranslation'
 import logoImg from '../../assets/icons/Rakshak.jpg'
 import './Header.css'
 
@@ -9,23 +10,19 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   useBodyLock(mobileMenuOpen)
   const [partnerDropdownOpen, setPartnerDropdownOpen] = useState(false)
+  const { t } = useTranslation()
 
   const closeMenu = useCallback(() => setMobileMenuOpen(false), [])
-
-  const handleNavClick = useCallback(() => {
-    closeMenu()
-  }, [closeMenu])
+  const handleNavClick = useCallback(() => closeMenu(), [closeMenu])
 
   return (
     <header className="header">
       <div className="header-container">
-        {/* Logo + Brand */}
         <Link to="/" className="logo-wrap" onClick={closeMenu}>
           <img src={logoImg} alt="Rakshak" className="logo-img" />
           <span className="logo-text">RAKSHAK</span>
         </Link>
 
-        {/* Hamburger */}
         <button
           className="mobile-menu-toggle"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -34,67 +31,55 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
           {mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
         </button>
 
-        {/* Nav Links — Desktop only */}
         <nav className="nav-desktop">
-          <a href="#features">Why Rakshak?</a>
-          <a href="#premium-tools">Premium Tools</a>
-          <a href="#services">Services</a>
-          <Link to="/about">About Us</Link>
-          <a href="#contact">Contact</a>
+          <a href="#features">{t('navWhyRakshak')}</a>
+          <a href="#premium-tools">{t('navPremiumTools')}</a>
+          <a href="#services">{t('navServices')}</a>
+          <Link to="/about">{t('navAboutUs')}</Link>
+          <a href="#contact">{t('navContact')}</a>
         </nav>
 
-        {/* Right Side — Desktop only */}
         <div className="nav-right">
-          <button className="btn-login" onClick={onLoginClick}>ALREADY REGISTERED?</button>
-          <select
-            className="language-select"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
+          <button className="btn-login" onClick={onLoginClick}>{t('navAlreadyRegistered')}</button>
+          <select className="language-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="en">ENGLISH</option>
-            <option value="hi">HINDI</option>
+            <option value="hi">हिन्दी</option>
           </select>
-          <div
-            className="partner-dropdown"
-            onMouseEnter={() => setPartnerDropdownOpen(true)}
-            onMouseLeave={() => setPartnerDropdownOpen(false)}
-          >
-            <button className="partner-zone-btn">PARTNER ZONE ▼</button>
+          <div className="partner-dropdown" onMouseEnter={() => setPartnerDropdownOpen(true)} onMouseLeave={() => setPartnerDropdownOpen(false)}>
+            <button className="partner-zone-btn">{t('navPartnerZone')}</button>
             {partnerDropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={onPartnerLogin}>Partner Login</button>
-                <button onClick={onSupportTicket}>Support & Ticket</button>
+                <button onClick={onPartnerLogin}>{t('navPartnerLogin')}</button>
+                <button onClick={onSupportTicket}>{t('navSupportTicket')}</button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu — Slide Panel */}
       {mobileMenuOpen && (
         <>
           <div className="mobile-overlay" onClick={closeMenu} />
           <nav className="mobile-menu">
-            <a href="#features" onClick={handleNavClick}>Why Rakshak?</a>
-            <a href="#premium-tools" onClick={handleNavClick}>Premium Tools</a>
-            <a href="#services" onClick={handleNavClick}>Rakshak Services</a>
-            <Link to="/about" onClick={handleNavClick}>About Us</Link>
-            <a href="#contact" onClick={handleNavClick}>Contact Us</a>
-
+            <div className="mobile-menu-header">
+              <img src={logoImg} alt="Rakshak" className="mobile-menu-logo" />
+              <span className="mobile-menu-brand">RAKSHAK</span>
+            </div>
+            <a href="#features" onClick={handleNavClick}>{t('navWhyRakshak')}</a>
+            <a href="#premium-tools" onClick={handleNavClick}>{t('navPremiumTools')}</a>
+            <a href="#services" onClick={handleNavClick}>{t('navServices')}</a>
+            <Link to="/about" onClick={handleNavClick}>{t('navAboutUs')}</Link>
+            <a href="#contact" onClick={handleNavClick}>{t('navContact')}</a>
             <div className="mobile-divider" />
-
-            <button className="mobile-link highlight-link" onClick={() => { closeMenu(); onLoginClick() }}>
-              ALREADY REGISTERED?
-            </button>
-            <button className="mobile-link" onClick={() => { closeMenu(); onPartnerLogin() }}>
-              Partner Login
-            </button>
-            <button className="mobile-link" onClick={() => { closeMenu(); onSupportTicket() }}>
-              Support & Ticket
-            </button>
-            <button className="mobile-link" onClick={() => { closeMenu(); onAdminLogin() }}>
-              Admin Login
-            </button>
+            <button className="mobile-link highlight-link" onClick={() => { closeMenu(); onLoginClick() }}>{t('navAlreadyRegistered')}</button>
+            <button className="mobile-link" onClick={() => { closeMenu(); onPartnerLogin() }}>{t('navPartnerLogin')}</button>
+            <button className="mobile-link" onClick={() => { closeMenu(); onSupportTicket() }}>{t('navSupportTicket')}</button>
+            <button className="mobile-link" onClick={() => { closeMenu(); onAdminLogin() }}>{t('navAdminLogin')}</button>
+            <div className="mobile-divider" />
+            <select className="mobile-lang-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="en">🌐 ENGLISH</option>
+              <option value="hi">🌐 हिन्दी</option>
+            </select>
           </nav>
         </>
       )}

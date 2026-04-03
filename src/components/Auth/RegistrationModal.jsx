@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import { RAZORPAY_KEY, TAG_PRICES, COMPARISON_TABLE } from '../../utils/constants'
 import { validateMobileNumber, generateQRCodeUrl } from '../../utils/helpers'
 import { db, ref, push, set, get, update, query, orderByChild, equalTo, increment } from '../../config/firebase'
@@ -63,7 +64,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
     e.preventDefault()
 
     if (!isCouponApplied) {
-      alert('Bhai, pehle Coupon Code (WTRAK01) / Dealer ID apply karo!')
+      toast.error('Pehle Coupon Code (WTRAK01) / Dealer ID apply karo!')
       return
     }
 
@@ -139,7 +140,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
         }
       } catch (err) {
         console.error('Dev save error:', err)
-        alert('Firebase error: ' + err.message)
+        toast.error('Firebase error: ' + err.message)
       } finally {
         setSubmitting(false)
       }
@@ -190,7 +191,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
           }
         } catch (err) {
           console.error('Firebase Error:', err)
-          alert('Database Connection Error! But Payment Successful. ID: ' + response.razorpay_payment_id)
+          toast.error('Database error! Payment ID: ' + response.razorpay_payment_id)
           setSubmitting(false)
         }
       },

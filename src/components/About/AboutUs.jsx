@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { useAppContext } from '../../context/AppContext'
+import Header from '../Header/Header'
 import './AboutUs.css'
 
 const TEAM_MEMBERS = [
@@ -96,18 +98,29 @@ const StatCard = ({ target, label, suffix, display }) => {
 }
 
 const AboutUs = () => {
-  const { handleRegisterClick } = useAppContext()
+  const { handleRegisterClick, language, setLanguage, handleLoginClick,
+    setPartnerLoginOpen, setSupportTicketOpen, setAdminLoginOpen } = useAppContext()
   const [letterOpen, setLetterOpen] = useState(false)
 
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
 
   return (
     <div className="about-page">
-      {/* Back to Home */}
-      <Link to="/" className="about-back-btn">← Back to Home</Link>
+      <Helmet>
+        <title>About Us - Rakshak | India's Digital Road Shield</title>
+        <meta name="description" content="Learn about Rakshak - India's digital road shield. Our mission to protect every vehicle with smart QR technology." />
+      </Helmet>
+
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        onLoginClick={handleLoginClick}
+        onPartnerLogin={() => setPartnerLoginOpen(true)}
+        onSupportTicket={() => setSupportTicketOpen(true)}
+        onAdminLogin={() => setAdminLoginOpen(true)}
+      />
 
       {/* Hero */}
       <section className="about-hero-advance">

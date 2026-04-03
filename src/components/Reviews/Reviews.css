@@ -1,50 +1,92 @@
-/* Reviews Section */
+/* ==========================================
+   REVIEWS CAROUSEL — MOBILE FIRST
+   ========================================== */
 .reviews-section {
-  padding: 80px 20px;
+  padding: 50px 0;
   background: rgba(242, 140, 56, 0.02);
   border-top: 1px solid rgba(242, 140, 56, 0.05);
   border-bottom: 1px solid rgba(242, 140, 56, 0.05);
   overflow: hidden;
 }
 
-.reviews-slider-container {
-  overflow: hidden;
+.reviews-section .section-container {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Carousel Wrapper */
+.reviews-carousel {
+  position: relative;
   margin-top: 30px;
-  width: 100%;
+}
+
+/* Track — horizontal scroll */
+.reviews-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 4px 20px;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.reviews-track:active {
+  cursor: grabbing;
+}
+
+/* Hide scrollbar but keep scroll functional */
+.reviews-track::-webkit-scrollbar {
+  height: 0;
+  display: none;
 }
 
 .reviews-track {
-  display: flex;
-  gap: 20px;
-  will-change: transform;
+  scrollbar-width: none;
 }
 
+/* Cards */
 .review-card {
-  min-width: 300px;
-  max-width: 300px;
+  min-width: 280px;
+  max-width: 280px;
   background: rgba(21, 21, 21, 0.6);
-  border: 1px solid rgba(242, 140, 56, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
-  padding: 25px;
+  padding: 24px 20px;
   flex-shrink: 0;
-  transition: border-color 0.3s;
+  scroll-snap-align: start;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .review-card:hover {
-  border-color: rgba(242, 140, 56, 0.5);
+  border-color: rgba(242, 140, 56, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(242, 140, 56, 0.08);
 }
 
 .review-stars {
-  margin-bottom: 12px;
-  font-size: 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .review-text {
   color: #ccc;
   font-size: 13px;
-  line-height: 1.7;
-  margin-bottom: 15px;
-  display: block;
+  line-height: 1.75;
+  margin-bottom: 18px;
+  flex: 1;
+  font-style: italic;
+}
+
+.review-author {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 14px;
 }
 
 .review-name {
@@ -52,19 +94,99 @@
   font-weight: 900;
   font-size: 13px;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .review-location {
-  color: #888;
+  color: #666;
   font-size: 11px;
   display: block;
 }
 
-@media (max-width: 480px) {
+/* ===== ARROWS ===== */
+.carousel-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(242, 140, 56, 0.3);
+  color: #F28C38;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.carousel-arrow:hover {
+  background: #F28C38;
+  color: #000;
+  border-color: #F28C38;
+  box-shadow: 0 6px 20px rgba(242, 140, 56, 0.3);
+}
+
+.carousel-arrow-left {
+  left: 8px;
+}
+
+.carousel-arrow-right {
+  right: 8px;
+}
+
+/* ===== DESKTOP ===== */
+@media (min-width: 769px) {
+  .reviews-section {
+    padding: 80px 0;
+  }
+
+  .reviews-section .section-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .reviews-track {
+    gap: 20px;
+    padding: 10px 10px 20px;
+  }
+
   .review-card {
-    min-width: 260px;
-    max-width: 260px;
-    padding: 20px;
+    min-width: 320px;
+    max-width: 320px;
+    padding: 28px 24px;
+  }
+
+  .carousel-arrow {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .carousel-arrow-left {
+    left: 0;
+  }
+
+  .carousel-arrow-right {
+    right: 0;
+  }
+}
+
+/* ===== SMALL MOBILE ===== */
+@media (max-width: 380px) {
+  .review-card {
+    min-width: 250px;
+    max-width: 250px;
+    padding: 20px 16px;
+  }
+
+  .review-text {
+    font-size: 12px;
   }
 }

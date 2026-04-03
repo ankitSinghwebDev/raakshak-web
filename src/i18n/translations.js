@@ -1,0 +1,319 @@
+const translations = {
+  en: {
+    // ===== BRAND =====
+    brandTagline: 'HAR GAADI KA GUARDIAN',
+
+    // ===== HEADER =====
+    navWhyRakshak: 'Why Rakshak?',
+    navPremiumTools: 'Premium Tools',
+    navServices: 'Services',
+    navAboutUs: 'About Us',
+    navContact: 'Contact',
+    navAlreadyRegistered: 'ALREADY REGISTERED?',
+    navPartnerZone: 'PARTNER ZONE ▼',
+    navPartnerLogin: 'Partner Login',
+    navSupportTicket: 'Support & Ticket',
+    navAdminLogin: 'Admin Login',
+
+    // ===== HERO =====
+    heroCounter: '2,484 VEHICLES PROTECTED TODAY',
+    heroTitle: "Protect Your Vehicle's Privacy",
+    heroTagline: 'HAR GAADI KA GUARDIAN',
+    heroCTA: 'REGISTER YOUR VEHICLE',
+
+    // ===== FEATURES =====
+    featuresTitle: "Why You'll",
+    featuresTitleHighlight: 'Love Rakshak Tag',
+    featuresSubtitle: 'A SMARTER, SAFER WAY TO HANDLE EVERYDAY PARKING SITUATIONS',
+    feature1Title: 'NO Parking Drama',
+    feature1Desc: "Get polite alerts if you've parked wrongly—no heated arguments, no awkward sticky notes.",
+    feature2Title: 'Privacy First',
+    feature2Desc: 'Communicate safely without ever revealing your phone number. Your identity stays encrypted.',
+    feature3Title: 'Emergency Profiles',
+    feature3Desc: 'In urgent cases, anyone can scan to see your blood group or contact family instantly.',
+    feature4Title: 'Instant Updates',
+    feature4Desc: 'Change your phone number anytime from your dashboard. One tag for life.',
+    feature5Title: 'No App Needed',
+    feature5Desc: 'Anyone can scan using their phone camera. No apps, no downloads — just quick and easy access when it matters.',
+    feature6Title: 'Works for All',
+    feature6Desc: 'Perfect for cars, bikes, trucks, or fleets. Manage all under one Rakshak account.',
+    feature7Title: 'Tough & Reflective',
+    feature7Desc: 'Weather-proof tags designed for rain and sun. High-quality reflective material.',
+    feature8Title: 'Built for India',
+    feature8Desc: 'Designed for our busy roads, narrow lanes, and unique parking challenges.',
+
+    // ===== PROCESS FLOW =====
+    processTitle: 'Order to',
+    processTitleHighlight: 'Protection',
+    processSubtitle: 'YOUR JOURNEY FROM CLICK TO PROTECTED VEHICLE',
+    processStep1: 'Register',
+    processStep1Desc: 'Fill vehicle details & select your QR design.',
+    processStep2: 'Secure Pay',
+    processStep2Desc: 'UPI, Cards or Net Banking via safe gateway.',
+    processStep3: 'Radium Print',
+    processStep3Desc: 'We print your custom tag on reflective material.',
+    processStep4: 'Dispatch',
+    processStep4Desc: 'Courier tracking link sent on your WhatsApp.',
+    processStep5: 'Activated',
+    processStep5Desc: 'Peel, Paste & enjoy 24/7 vehicle guardianship.',
+
+    // ===== WHY INDIA NEEDS =====
+    whyIndiaTitle: 'Why India',
+    whyIndiaTitleHighlight: 'Needs Rakshak?',
+    whyIndiaSubtitle: 'REAL NUMBERS. REAL PROBLEMS. OFFICIAL DATA.',
+    whyIndia1Title: '460+ Daily Deaths',
+    whyIndia1Desc: 'India records over 460 road accident deaths daily. Rakshak helps emergency responders contact your family within the Golden Hour.',
+    whyIndia2Title: '30% Parking Disputes',
+    whyIndia2Desc: 'According to NCRB, parking disputes often escalate to violence because there is no way to contact the vehicle owner.',
+    whyIndia3Title: '20 Lakh+ Fines',
+    whyIndia3Desc: 'In just one year, a single city issues over 20 lakh parking challans. Rakshak alerts you before the police tow your vehicle.',
+    whyIndiaAboutTitle: "RAKSHAK: India's Digital Road Shield",
+    whyIndiaAboutDesc: "We are not just selling stickers, we are eliminating India's Road Rage and Towing tension. Abhishek Technology India Private Limited's vision is that every Indian driver should have the power to communicate with anyone without leaking their mobile number.",
+    whyIndiaAboutQuote: '"In an emergency, your mobile may be locked, but your vehicle\'s Rakshak Tag always speaks."',
+
+    // ===== REVIEWS =====
+    reviewsTitle: 'What Our',
+    reviewsTitleHighlight: 'Guardians',
+    reviewsSubtitle: 'TRUSTED BY 2,400+ VEHICLE OWNERS ACROSS INDIA',
+
+    // ===== PREMIUM TOOLS =====
+    premiumToolsTitle: 'Rakshak',
+    premiumToolsTitleHighlight: 'Premium Tools',
+    premiumToolsSubtitle: 'ADVANCED DIGITAL SHIELD FOR A SMARTER DRIVING EXPERIENCE',
+
+    // ===== SERVICES =====
+    servicesTitle: 'Rakshak',
+    servicesTitleHighlight: 'Extra Services',
+    servicesSubtitle: 'ONE STOP SOLUTION FOR ALL YOUR VEHICLE ESSENTIALS',
+
+    // ===== CONTACT =====
+    contactTitle: 'CONTACT US',
+    contactCallNow: 'CALL NOW',
+    contactWhatsApp: 'WHATSAPP NOW',
+
+    // ===== REGISTRATION MODAL =====
+    regTitle: 'Register Your Vehicle',
+    regOwnerName: 'Owner Name',
+    regVehicleNum: 'Vehicle Number',
+    regMobile: 'Mobile Number',
+    regWhatsApp: 'WhatsApp Number',
+    regCouponLabel: 'Coupon Code-WTRAK01',
+    regCouponPlaceholder: 'Enter WTRAK01 or Dealer ID',
+    regApply: 'APPLY',
+    regCouponSuccess: '🎉 Wow! Coupon Applied. Welcome to Rakshak Family!',
+    regCouponError: '❌ Invalid Code! Please enter valid Code.',
+    regSimpleQR: 'SIMPLE QR ⬛',
+    regPremiumStudio: '🎨 PREMIUM STUDIO',
+    regTerms: 'I agree to the Terms & Conditions and Privacy Policy of Rakshak.',
+    regPriceText: 'FOR 2 QR CARDS',
+    regApplyCodeFirst: 'APPLY CODE FIRST',
+    regPaySecurely: 'PAY SECURELY',
+    regOpening: 'Opening Secure Gateway...',
+    regCouponRequired: 'Please apply a valid Coupon Code or Dealer ID first',
+
+    // ===== LOGIN MODAL =====
+    loginWelcome: 'Welcome',
+    loginBack: 'Back',
+    loginPlaceholder: 'REGISTERED MOBILE',
+    loginSubmit: 'Sign In To Dashboard ➔',
+    loginVerifying: 'Verifying...',
+    loginFooter: 'Protected by Rakshak Encryption',
+    loginErrorNotFound: 'Mobile number not registered. Please register first.',
+    loginErrorConnection: 'Connection error. Please try again.',
+    loginErrorInvalid: 'Please enter a valid 10-digit mobile number',
+
+    // ===== SUCCESS MODAL =====
+    successTitle: 'Registration Successful!',
+    successQRLinked: 'Your QR code has been linked successfully.',
+    successYourId: 'YOUR UNIQUE RAKSHAK ID',
+    successDone: 'DONE',
+
+    // ===== DASHBOARD =====
+    dashLogout: 'LOGOUT',
+    dashWelcome: 'Welcome back,',
+    dashShieldActive: 'SHIELD ACTIVE',
+    dashTotalScans: 'Total Scans',
+    dashProtection: 'Protection',
+    dashActive: 'Active',
+    dashPlan: 'Plan',
+    dashRegistered: 'Registered',
+    dashQuickPanel: 'Quick Control Panel',
+    dashUpdateNo: 'Update No.',
+    dashEmergency: 'Emergency',
+    dashMyVehicles: 'My Vehicles',
+    dashSupport: 'Support',
+    dashPremiumTools: 'Rakshak Premium Tools',
+    dashUpgradeToUnlock: 'UPGRADE TO UNLOCK',
+    dashYourQR: 'Your Rakshak QR',
+    dashScanToInform: 'Scan to inform vehicle owner',
+    dashAccountDetails: 'Account Details',
+    dashRakshakId: 'Rakshak ID',
+    dashVehicle: 'Vehicle',
+    dashMobile: 'Mobile',
+    dashPayment: 'Payment',
+    dashCoupon: 'Coupon',
+
+    // ===== FOOTER =====
+    footerRights: 'Abhishek Technology India Private Limited. All Rights Reserved.',
+  },
+
+  hi: {
+    // ===== BRAND =====
+    brandTagline: 'हर गाड़ी का गार्जियन',
+
+    // ===== HEADER =====
+    navWhyRakshak: 'रक्षक क्यों?',
+    navPremiumTools: 'प्रीमियम टूल्स',
+    navServices: 'सेवाएं',
+    navAboutUs: 'हमारे बारे में',
+    navContact: 'संपर्क',
+    navAlreadyRegistered: 'पहले से रजिस्टर्ड?',
+    navPartnerZone: 'पार्टनर ज़ोन ▼',
+    navPartnerLogin: 'पार्टनर लॉगिन',
+    navSupportTicket: 'सपोर्ट और टिकट',
+    navAdminLogin: 'एडमिन लॉगिन',
+
+    // ===== HERO =====
+    heroCounter: '2,484 वाहन आज सुरक्षित',
+    heroTitle: 'अपनी गाड़ी की प्राइवेसी सुरक्षित करें',
+    heroTagline: 'हर गाड़ी का गार्जियन',
+    heroCTA: 'अपना वाहन रजिस्टर करें',
+
+    // ===== FEATURES =====
+    featuresTitle: 'आप क्यों',
+    featuresTitleHighlight: 'रक्षक टैग पसंद करेंगे',
+    featuresSubtitle: 'रोज़मर्रा की पार्किंग समस्याओं के लिए एक स्मार्ट और सुरक्षित समाधान',
+    feature1Title: 'पार्किंग ड्रामा नहीं',
+    feature1Desc: 'गलत पार्किंग पर विनम्र अलर्ट पाएं — न बहस, न अजीब स्टिकर नोट्स।',
+    feature2Title: 'प्राइवेसी सबसे पहले',
+    feature2Desc: 'बिना अपना फ़ोन नंबर बताए सुरक्षित संवाद करें। आपकी पहचान एन्क्रिप्टेड रहती है।',
+    feature3Title: 'इमरजेंसी प्रोफ़ाइल',
+    feature3Desc: 'ज़रूरी स्थिति में कोई भी स्कैन करके आपका ब्लड ग्रुप या परिवार से तुरंत संपर्क कर सकता है।',
+    feature4Title: 'तुरंत अपडेट',
+    feature4Desc: 'डैशबोर्ड से कभी भी अपना फ़ोन नंबर बदलें। एक टैग, जीवन भर के लिए।',
+    feature5Title: 'कोई ऐप नहीं चाहिए',
+    feature5Desc: 'कोई भी अपने फ़ोन कैमरे से स्कैन कर सकता है। कोई ऐप नहीं, कोई डाउनलोड नहीं।',
+    feature6Title: 'सभी के लिए',
+    feature6Desc: 'कार, बाइक, ट्रक या फ़्लीट — सब कुछ एक रक्षक अकाउंट से मैनेज करें।',
+    feature7Title: 'मज़बूत और चमकदार',
+    feature7Desc: 'बारिश और धूप के लिए बनी वेदर-प्रूफ़ टैग। उच्च गुणवत्ता का रिफ्लेक्टिव मटीरियल।',
+    feature8Title: 'भारत के लिए बना',
+    feature8Desc: 'हमारी व्यस्त सड़कों, तंग गलियों और अनूठी पार्किंग चुनौतियों के लिए डिज़ाइन किया गया।',
+
+    // ===== PROCESS FLOW =====
+    processTitle: 'ऑर्डर से',
+    processTitleHighlight: 'सुरक्षा',
+    processSubtitle: 'क्लिक से सुरक्षित वाहन तक आपका सफ़र',
+    processStep1: 'रजिस्टर',
+    processStep1Desc: 'वाहन की जानकारी भरें और QR डिज़ाइन चुनें।',
+    processStep2: 'सुरक्षित भुगतान',
+    processStep2Desc: 'UPI, कार्ड या नेट बैंकिंग से सुरक्षित पेमेंट।',
+    processStep3: 'रेडियम प्रिंट',
+    processStep3Desc: 'हम आपका कस्टम टैग रिफ्लेक्टिव मटीरियल पर प्रिंट करते हैं।',
+    processStep4: 'डिस्पैच',
+    processStep4Desc: 'कूरियर ट्रैकिंग लिंक आपके WhatsApp पर भेजा जाएगा।',
+    processStep5: 'एक्टिवेट',
+    processStep5Desc: 'छीलें, चिपकाएं और 24/7 वाहन सुरक्षा का आनंद लें।',
+
+    // ===== WHY INDIA NEEDS =====
+    whyIndiaTitle: 'भारत को',
+    whyIndiaTitleHighlight: 'रक्षक की ज़रूरत क्यों?',
+    whyIndiaSubtitle: 'असली आंकड़े। असली समस्याएं। सरकारी डेटा।',
+    whyIndia1Title: '460+ रोज़ाना मौतें',
+    whyIndia1Desc: 'भारत में हर दिन 460+ लोग सड़क दुर्घटनाओं में जान गंवाते हैं। रक्षक "गोल्डन ऑवर" में परिवार को सूचित करता है।',
+    whyIndia2Title: '30% पार्किंग विवाद',
+    whyIndia2Desc: 'NCRB के अनुसार, पार्किंग विवाद अक्सर हिंसा में बदल जाते हैं क्योंकि मालिक से संपर्क का कोई तरीका नहीं होता।',
+    whyIndia3Title: '20 लाख+ जुर्माने',
+    whyIndia3Desc: 'सिर्फ एक साल में एक शहर में 20 लाख+ पार्किंग चालान कटते हैं। रक्षक आपको पुलिस से पहले बताता है।',
+    whyIndiaAboutTitle: 'रक्षक: भारत की डिजिटल रोड शील्ड',
+    whyIndiaAboutDesc: 'हम सिर्फ स्टिकर नहीं बेच रहे, हम भारत की रोड रेज और टोइंग टेंशन को खत्म कर रहे हैं। अभिषेक टेक्नोलॉजी इंडिया प्राइवेट लिमिटेड का विज़न है कि हर भारतीय ड्राइवर बिना अपना नंबर लीक किए किसी से भी संपर्क कर सके।',
+    whyIndiaAboutQuote: '"इमरजेंसी में आपका मोबाइल लॉक हो सकता है, पर आपकी गाड़ी का रक्षक टैग हमेशा बोलता है।"',
+
+    // ===== REVIEWS =====
+    reviewsTitle: 'हमारे',
+    reviewsTitleHighlight: 'गार्जियन्स',
+    reviewsSubtitle: 'भारत भर में 2,400+ वाहन मालिकों का भरोसा',
+
+    // ===== PREMIUM TOOLS =====
+    premiumToolsTitle: 'रक्षक',
+    premiumToolsTitleHighlight: 'प्रीमियम टूल्स',
+    premiumToolsSubtitle: 'स्मार्ट ड्राइविंग अनुभव के लिए एडवांस्ड डिजिटल शील्ड',
+
+    // ===== SERVICES =====
+    servicesTitle: 'रक्षक',
+    servicesTitleHighlight: 'अतिरिक्त सेवाएं',
+    servicesSubtitle: 'आपके वाहन की सभी ज़रूरतों का एक समाधान',
+
+    // ===== CONTACT =====
+    contactTitle: 'संपर्क करें',
+    contactCallNow: 'अभी कॉल करें',
+    contactWhatsApp: 'WhatsApp करें',
+
+    // ===== REGISTRATION MODAL =====
+    regTitle: 'अपना वाहन रजिस्टर करें',
+    regOwnerName: 'मालिक का नाम',
+    regVehicleNum: 'वाहन नंबर',
+    regMobile: 'मोबाइल नंबर',
+    regWhatsApp: 'WhatsApp नंबर',
+    regCouponLabel: 'कूपन कोड-WTRAK01',
+    regCouponPlaceholder: 'WTRAK01 या डीलर ID दर्ज करें',
+    regApply: 'लागू करें',
+    regCouponSuccess: '🎉 बधाई! कूपन लागू हो गया। रक्षक परिवार में स्वागत है!',
+    regCouponError: '❌ अमान्य कोड! कृपया सही कोड दर्ज करें।',
+    regSimpleQR: 'सिंपल QR ⬛',
+    regPremiumStudio: '🎨 प्रीमियम स्टूडियो',
+    regTerms: 'मैं रक्षक की नियम और शर्तों तथा गोपनीयता नीति से सहमत हूं।',
+    regPriceText: '2 QR कार्ड के लिए',
+    regApplyCodeFirst: 'पहले कोड लागू करें',
+    regPaySecurely: 'सुरक्षित भुगतान करें',
+    regOpening: 'सुरक्षित गेटवे खोल रहे हैं...',
+    regCouponRequired: 'कृपया पहले एक मान्य कूपन कोड या डीलर ID लागू करें',
+
+    // ===== LOGIN MODAL =====
+    loginWelcome: 'स्वागत',
+    loginBack: 'वापस',
+    loginPlaceholder: 'रजिस्टर्ड मोबाइल',
+    loginSubmit: 'डैशबोर्ड में लॉगिन करें ➔',
+    loginVerifying: 'सत्यापित कर रहे हैं...',
+    loginFooter: 'रक्षक एन्क्रिप्शन द्वारा सुरक्षित',
+    loginErrorNotFound: 'मोबाइल नंबर रजिस्टर्ड नहीं है। कृपया पहले रजिस्टर करें।',
+    loginErrorConnection: 'कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।',
+    loginErrorInvalid: 'कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें',
+
+    // ===== SUCCESS MODAL =====
+    successTitle: 'रजिस्ट्रेशन सफल!',
+    successQRLinked: 'आपका QR कोड सफलतापूर्वक लिंक हो गया है।',
+    successYourId: 'आपकी यूनिक रक्षक ID',
+    successDone: 'हो गया',
+
+    // ===== DASHBOARD =====
+    dashLogout: 'लॉगआउट',
+    dashWelcome: 'स्वागत है,',
+    dashShieldActive: 'शील्ड एक्टिव',
+    dashTotalScans: 'कुल स्कैन',
+    dashProtection: 'सुरक्षा',
+    dashActive: 'एक्टिव',
+    dashPlan: 'प्लान',
+    dashRegistered: 'रजिस्टर्ड',
+    dashQuickPanel: 'क्विक कंट्रोल पैनल',
+    dashUpdateNo: 'नंबर अपडेट',
+    dashEmergency: 'इमरजेंसी',
+    dashMyVehicles: 'मेरे वाहन',
+    dashSupport: 'सपोर्ट',
+    dashPremiumTools: 'रक्षक प्रीमियम टूल्स',
+    dashUpgradeToUnlock: 'अनलॉक करने के लिए अपग्रेड करें',
+    dashYourQR: 'आपका रक्षक QR',
+    dashScanToInform: 'वाहन मालिक को सूचित करने के लिए स्कैन करें',
+    dashAccountDetails: 'अकाउंट विवरण',
+    dashRakshakId: 'रक्षक ID',
+    dashVehicle: 'वाहन',
+    dashMobile: 'मोबाइल',
+    dashPayment: 'भुगतान',
+    dashCoupon: 'कूपन',
+
+    // ===== FOOTER =====
+    footerRights: 'अभिषेक टेक्नोलॉजी इंडिया प्राइवेट लिमिटेड। सर्वाधिकार सुरक्षित।',
+  },
+}
+
+export default translations

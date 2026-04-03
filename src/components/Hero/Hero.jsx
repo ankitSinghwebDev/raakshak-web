@@ -1,9 +1,12 @@
 import React from 'react'
 import { SafetyCertificateOutlined } from '@ant-design/icons'
+import useTranslation from '../../i18n/useTranslation'
 import coverImg from '../../assets/icons/coverpage.jpg'
 import './Hero.css'
 
-const Hero = ({ language, onRegisterClick }) => {
+const Hero = ({ onRegisterClick }) => {
+  const { t } = useTranslation()
+
   return (
     <section className="hero">
       <div className="hero-bg">
@@ -12,16 +15,12 @@ const Hero = ({ language, onRegisterClick }) => {
       </div>
       <div className="hero-content">
         <div className="hero-counter">
-          <span className="blinking-dot" aria-hidden="true"></span> 2,484 VEHICLES PROTECTED TODAY
+          <span className="blinking-dot" aria-hidden="true"></span> {t('heroCounter')}
         </div>
-        <h1 className="hero-title">Protect Your Vehicle's Privacy</h1>
-        <p className="hero-tagline">HAR GAADI KA GUARDIAN</p>
-        <button
-          className="btn-register"
-          onClick={onRegisterClick}
-          aria-label="Register your vehicle with Rakshak"
-        >
-          <SafetyCertificateOutlined /> REGISTER YOUR VEHICLE
+        <h1 className="hero-title">{t('heroTitle')}</h1>
+        <p className="hero-tagline">{t('heroTagline')}</p>
+        <button className="btn-register" onClick={onRegisterClick}>
+          <SafetyCertificateOutlined /> {t('heroCTA')}
         </button>
       </div>
     </section>

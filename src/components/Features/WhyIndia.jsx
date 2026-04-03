@@ -1,57 +1,54 @@
-import React from 'react'
-import { WHY_INDIA_NEEDS, GOVT_REPORTS } from '../../utils/constants'
+import { GOVT_REPORTS } from '../../utils/constants'
+import useTranslation from '../../i18n/useTranslation'
 import './WhyIndia.css'
 
+const NEEDS_KEYS = [
+  { id: 1, badge: 'ALARMING', titleKey: 'whyIndia1Title', descKey: 'whyIndia1Desc', isAlert: true },
+  { id: 2, badge: 'ROAD RAGE', titleKey: 'whyIndia2Title', descKey: 'whyIndia2Desc' },
+  { id: 3, badge: 'CHALLAN', titleKey: 'whyIndia3Title', descKey: 'whyIndia3Desc' },
+]
+
 const WhyIndia = ({ onCardClick }) => {
+  const { t } = useTranslation()
+
   return (
     <section className="why-india-section" id="about">
       <div className="section-container">
         <h2 className="section-title">
-          Why India <span className="highlight">Needs Rakshak?</span>
+          {t('whyIndiaTitle')} <span className="highlight">{t('whyIndiaTitleHighlight')}</span>
         </h2>
-        <p className="section-subtitle">REAL NUMBERS. REAL PROBLEMS. OFFICIAL DATA.</p>
+        <p className="section-subtitle">{t('whyIndiaSubtitle')}</p>
 
         <div className="needs-grid">
-          {WHY_INDIA_NEEDS.map((item, index) => (
+          {NEEDS_KEYS.map((item, index) => (
             <div
               key={item.id}
               className={`needs-card ${item.isAlert ? 'alert-card' : ''}`}
               onClick={() => onCardClick && onCardClick(index, 'needs')}
             >
-              <span className={`needs-badge ${item.isAlert ? 'badge-alert' : ''}`}>
-                {item.badge}
-              </span>
-              <h4 className={item.isAlert ? 'alert-title' : ''}>{item.title}</h4>
-              <p className="needs-desc">{item.description}</p>
+              <span className={`needs-badge ${item.isAlert ? 'badge-alert' : ''}`}>{item.badge}</span>
+              <h4 className={item.isAlert ? 'alert-title' : ''}>{t(item.titleKey)}</h4>
+              <p className="needs-desc">{t(item.descKey)}</p>
             </div>
           ))}
         </div>
 
-        {/* Government Reports */}
         <div className="report-link-box">
           <p className="report-heading">📊 VERIFIED GOVT. REPORTS (2024-25):</p>
           <ul className="report-list">
             {GOVT_REPORTS.map((report, i) => (
               <li key={i}>
-                <a href={report.url} target="_blank" rel="noopener noreferrer">
-                  {report.label}
-                </a>
+                <a href={report.url} target="_blank" rel="noopener noreferrer">{report.label}</a>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* About Box */}
         <div className="about-box">
           <div className="about-content">
-            <h3>RAKSHAK: India's Digital Road Shield</h3>
-            <p>
-              Hum sirf stickers nahi bech rahe, hum India ke <em>Road Rage aur Towing tension</em> ko khatam kar rahe hain.{' '}
-              <strong>Abhishek Technology India Private Limited</strong> ka vision hai ki har Indian driver ke paas ek aisi taqat ho jisse wo bina apna mobile number leak kiye kisi se bhi communicate kar sake.
-            </p>
-            <p className="about-quote">
-              "Emergency mein aapka mobile lock ho sakta hai, par aapki gaadi ka <em>Rakshak Tag</em> hamesha bolta hai."
-            </p>
+            <h3>{t('whyIndiaAboutTitle')}</h3>
+            <p>{t('whyIndiaAboutDesc')}</p>
+            <p className="about-quote">{t('whyIndiaAboutQuote')}</p>
             <div className="about-stats">
               <div className="stat-item">
                 <span className="stat-num">2,400+</span>

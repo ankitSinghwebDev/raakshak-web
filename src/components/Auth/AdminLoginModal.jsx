@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import './LoginModal.css'
 
 const AdminLoginModal = ({ open, onClose }) => {
@@ -14,7 +15,7 @@ const AdminLoginModal = ({ open, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     // TODO: Integrate admin authentication
-    alert('Admin Dashboard coming soon!')
+    toast('Admin Dashboard coming soon!')
   }
 
   if (!open) return null

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { db, ref, update } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
 import './UpdateNumberModal.css'
@@ -68,7 +69,7 @@ const UpdateNumberModal = ({ open, onClose }) => {
         whatsapp: whatsappNumber,
       })
 
-      alert('Number updated successfully!')
+      toast.success('Number updated successfully!')
       handleClose()
     } catch (err) {
       console.error('Update error:', err)
