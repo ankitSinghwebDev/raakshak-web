@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
 import { generateQRCodeUrl } from '../../utils/helpers'
@@ -28,24 +29,40 @@ const UserDashboard = () => {
     navigate('/')
   }, [logoutUser, navigate])
 
-  // Live scan listener
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }, [])
+
+  // Live scan listener + push notification
+  const prevScanCount = useRef(0)
+
   useEffect(() => {
     if (!currentUser?.key) return
 
-    // Listen for scans in real-time
     const scansRef = ref(db, `scans/${currentUser.key}`)
     const unsubscribe = onValue(scansRef, (snap) => {
       if (snap.exists()) {
         const data = snap.val()
         const scanList = Object.values(data)
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          .slice(0, 5) // last 5 scans
+          .slice(0, 5)
+        const newCount = Object.keys(data).length
+
+        // Trigger notification if new scan arrived (not on first load)
+        if (prevScanCount.current > 0 && newCount > prevScanCount.current) {
+          const latest = scanList[0]
+          triggerNotification(latest)
+        }
+        prevScanCount.current = newCount
+
         setRecentScans(scanList)
-        setTotalScans(Object.keys(data).length)
+        setTotalScans(newCount)
       }
     })
 
-    // Also check totalScans from customer record
     const customerRef = ref(db, `customers/${currentUser.key}/totalScans`)
     onValue(customerRef, (snap) => {
       if (snap.exists()) setTotalScans((prev) => Math.max(prev, snap.val()))
@@ -53,6 +70,30 @@ const UserDashboard = () => {
 
     return () => unsubscribe()
   }, [currentUser?.key])
+
+  const triggerNotification = (scan) => {
+    // Sound alert
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRl9vT19teleVZm10teleIBAAABAAEARKwAAIhYAQACABAAZGF0YQ==')
+      audio.volume = 0.5
+      audio.play().catch(() => {})
+    } catch {}
+
+    // In-app toast
+    toast(`🚨 New Scan Alert: ${scan.message}`, { duration: 5000 })
+
+    // Browser push notification (works in background tabs)
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const typeEmoji = scan.type === 'emergency' ? '🚨' : scan.type === 'urgent' ? '⚠️' : '🅿️'
+      new Notification(`${typeEmoji} Rakshak Alert — ${currentUser.vehicle}`, {
+        body: scan.message,
+        icon: 'https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png',
+        tag: 'rakshak-scan',
+        renotify: true,
+        vibrate: [200, 100, 200],
+      })
+    }
+  }
 
   if (!currentUser) return null
 
