@@ -10,6 +10,7 @@ import {
   orderByChild,
   equalTo,
   increment,
+  onValue,
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
@@ -31,7 +32,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 // Re-export database utilities
-export { ref, push, set, get, update, query, orderByChild, equalTo, increment };
+export { ref, push, set, get, update, query, orderByChild, equalTo, increment, onValue };
 
 export default app;
 

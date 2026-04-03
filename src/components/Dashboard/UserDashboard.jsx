@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
 import { generateQRCodeUrl } from '../../utils/helpers'
+import { db, ref, onValue } from '../../config/firebase'
 import EmergencyModal from './EmergencyModal'
 import UpdateNumberModal from './UpdateNumberModal'
 import UpgradePlanModal from './UpgradePlanModal'
@@ -19,11 +20,39 @@ const UserDashboard = () => {
   const [updateNumOpen, setUpdateNumOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
+  const [recentScans, setRecentScans] = useState([])
+  const [totalScans, setTotalScans] = useState(0)
 
   const handleLogout = useCallback(() => {
     logoutUser()
     navigate('/')
   }, [logoutUser, navigate])
+
+  // Live scan listener
+  useEffect(() => {
+    if (!currentUser?.key) return
+
+    // Listen for scans in real-time
+    const scansRef = ref(db, `scans/${currentUser.key}`)
+    const unsubscribe = onValue(scansRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.val()
+        const scanList = Object.values(data)
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 5) // last 5 scans
+        setRecentScans(scanList)
+        setTotalScans(Object.keys(data).length)
+      }
+    })
+
+    // Also check totalScans from customer record
+    const customerRef = ref(db, `customers/${currentUser.key}/totalScans`)
+    onValue(customerRef, (snap) => {
+      if (snap.exists()) setTotalScans((prev) => Math.max(prev, snap.val()))
+    })
+
+    return () => unsubscribe()
+  }, [currentUser?.key])
 
   if (!currentUser) return null
 
@@ -145,7 +174,7 @@ const UserDashboard = () => {
             <span>👁️</span>
           </div>
           <div>
-            <p className="db-stat-num">0</p>
+            <p className="db-stat-num">{totalScans}</p>
             <p className="db-stat-lbl">Total Scans</p>
           </div>
         </div>
@@ -286,6 +315,37 @@ const UserDashboard = () => {
           </div>
         </div>
       </section>
+
+      {/* ===== RECENT SCANS ===== */}
+      {recentScans.length > 0 && (
+        <section className="db-section">
+          <h3 className="db-section-title">Recent Scan Alerts</h3>
+          <div className="db-scans-list">
+            {recentScans.map((scan, i) => (
+              <div key={i} className={`db-scan-item db-scan-${scan.type}`}>
+                <div className="db-scan-left">
+                  <span className="db-scan-type-icon">
+                    {scan.type === 'parking' && '🅿️'}
+                    {scan.type === 'urgent' && '⚠️'}
+                    {scan.type === 'emergency' && '🚨'}
+                  </span>
+                  <div>
+                    <p className="db-scan-msg">{scan.message}</p>
+                    <p className="db-scan-time">
+                      {new Date(scan.timestamp).toLocaleString('en-IN', {
+                        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <span className={`db-scan-badge db-scan-badge-${scan.type}`}>
+                  {scan.type}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ===== FOOTER ===== */}
       <footer className="db-footer">

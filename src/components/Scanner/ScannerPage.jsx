@@ -1,7 +1,47 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { db, ref, get, query, orderByChild, equalTo } from '../../config/firebase'
+import { db, ref, get, push, set, query, orderByChild, equalTo } from '../../config/firebase'
 import './ScannerPage.css'
+
+const PREDEFINED_MESSAGES = [
+  { id: 'blocking', icon: '🅿️', label: 'Your vehicle is blocking my way', type: 'parking' },
+  { id: 'lights', icon: '💡', label: 'Your lights / AC are on', type: 'parking' },
+  { id: 'towing', icon: '🚛', label: 'Your car is being towed', type: 'urgent' },
+  { id: 'damage', icon: '⚠️', label: 'Someone damaged your vehicle', type: 'urgent' },
+  { id: 'accident', icon: '🚨', label: 'Accident / Medical Emergency', type: 'emergency' },
+]
+
+const RATE_LIMIT = { maxPerHour: 3, maxPerDay: 10 }
+
+const getDeviceFingerprint = () => {
+  let fp = localStorage.getItem('rksk_fp')
+  if (!fp) {
+    fp = 'fp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10)
+    localStorage.setItem('rksk_fp', fp)
+  }
+  return fp
+}
+
+const checkRateLimit = () => {
+  const now = Date.now()
+  const scans = JSON.parse(localStorage.getItem('rksk_scans') || '[]')
+  const hourAgo = now - 3600000
+  const dayAgo = now - 86400000
+  const hourScans = scans.filter((t) => t > hourAgo)
+  const dayScans = scans.filter((t) => t > dayAgo)
+
+  if (hourScans.length >= RATE_LIMIT.maxPerHour) return { blocked: true, reason: 'Too many attempts. Please try again in an hour.' }
+  if (dayScans.length >= RATE_LIMIT.maxPerDay) return { blocked: true, reason: 'Daily limit reached. Please try again tomorrow.' }
+  return { blocked: false }
+}
+
+const recordScan = () => {
+  const scans = JSON.parse(localStorage.getItem('rksk_scans') || '[]')
+  scans.push(Date.now())
+  // Keep only last 24h of scans
+  const dayAgo = Date.now() - 86400000
+  localStorage.setItem('rksk_scans', JSON.stringify(scans.filter((t) => t > dayAgo)))
+}
 
 const ScannerPage = () => {
   const [searchParams] = useSearchParams()
@@ -9,50 +49,43 @@ const ScannerPage = () => {
 
   const [loading, setLoading] = useState(true)
   const [userData, setUserData] = useState(null)
+  const [userKey, setUserKey] = useState(null)
   const [error, setError] = useState('')
-  const [contactMode, setContactMode] = useState(null) // null | 'options' | 'wrongParking' | 'accident'
+  const [screen, setScreen] = useState('main') // main | messages | sent | rate-limited
+  const [sending, setSending] = useState(false)
 
-  // Fetch user data by Rakshak ID
+  // Fetch user data
   useEffect(() => {
-    if (!id) {
-      setError('Invalid QR Code')
-      setLoading(false)
-      return
-    }
+    if (!id) { setError('Invalid QR Code'); setLoading(false); return }
 
     const fetchUser = async () => {
       try {
-        // Try query by generatedId first
         const customersRef = ref(db, 'customers')
-        let snap
+        let found = false
         try {
           const q = query(customersRef, orderByChild('generatedId'), equalTo(id))
-          snap = await get(q)
-        } catch (queryErr) {
-          // If index not set, fallback: fetch all and filter
-          console.warn('Index query failed, using fallback:', queryErr.message)
+          const snap = await get(q)
+          if (snap.exists()) {
+            const data = snap.val()
+            const key = Object.keys(data)[0]
+            setUserData(data[key])
+            setUserKey(key)
+            found = true
+          }
+        } catch {
+          // Fallback if no index
           const allSnap = await get(customersRef)
           if (allSnap.exists()) {
             const allData = allSnap.val()
-            const matchKey = Object.keys(allData).find(k => allData[k].generatedId === id)
+            const matchKey = Object.keys(allData).find((k) => allData[k].generatedId === id)
             if (matchKey) {
-              setUserData({ key: matchKey, ...allData[matchKey] })
-              setLoading(false)
-              return
+              setUserData(allData[matchKey])
+              setUserKey(matchKey)
+              found = true
             }
           }
-          setError('Vehicle not found')
-          setLoading(false)
-          return
         }
-
-        if (snap.exists()) {
-          const data = snap.val()
-          const key = Object.keys(data)[0]
-          setUserData({ key, ...data[key] })
-        } else {
-          setError('Vehicle not found')
-        }
+        if (!found) setError('Vehicle not found')
       } catch (err) {
         console.error('Fetch error:', err)
         setError('Connection error. Please try again.')
@@ -64,50 +97,66 @@ const ScannerPage = () => {
     fetchUser()
   }, [id])
 
-  // Build WhatsApp URL — use location.href so mobile browsers don't block it
-  const sendWhatsApp = (number, message) => {
-    const encoded = encodeURIComponent(message)
-    const url = `https://api.whatsapp.com/send?phone=91${number}&text=${encoded}`
-    window.location.href = url
+  // Send predefined message → store in Firebase (no direct number exposure)
+  const handleSendMessage = async (msg) => {
+    const rateCheck = checkRateLimit()
+    if (rateCheck.blocked) {
+      setError(rateCheck.reason)
+      setScreen('rate-limited')
+      return
+    }
+
+    setSending(true)
+    try {
+      const scanRef = ref(db, `scans/${userKey}`)
+      await push(scanRef, {
+        message: msg.label,
+        type: msg.type,
+        deviceFingerprint: getDeviceFingerprint(),
+        timestamp: new Date().toISOString(),
+      })
+
+      // Also update scan count on customer
+      const customerRef = ref(db, `customers/${userKey}`)
+      const snap = await get(customerRef)
+      const currentScans = snap.val()?.totalScans || 0
+      await set(ref(db, `customers/${userKey}/totalScans`), currentScans + 1)
+
+      recordScan()
+      setScreen('sent')
+    } catch (err) {
+      console.error('Send error:', err)
+      setError('Failed to send. Please try again.')
+    } finally {
+      setSending(false)
+    }
   }
 
-  const handleWrongParking = () => {
+  // Emergency — direct WhatsApp to ICE contact (only for real emergencies)
+  const handleEmergencySOS = () => {
     if (!userData) return
-    // Parking alerts go to OWNER's WhatsApp/mobile — not emergency contact
-    const contactNum = userData.whatsapp || userData.mobile
-    const msg = `🚨 RAKSHAK PARKING ALERT 🚨\n\nVehicle: ${userData.vehicle}\n\nYour vehicle is causing a parking issue. Please move it as soon as possible.\n\n— Sent via Rakshak QR Scan`
-    sendWhatsApp(contactNum, msg)
+    const rateCheck = checkRateLimit()
+    if (rateCheck.blocked) { setError(rateCheck.reason); setScreen('rate-limited'); return }
+
+    const iceContact = userData.emergency?.iceContact1
+    if (iceContact) {
+      const emergency = userData.emergency || {}
+      const medicalInfo = [
+        emergency.bloodGroup && emergency.bloodGroup !== 'Select' ? `Blood Group: ${emergency.bloodGroup}` : '',
+        emergency.age ? `Age: ${emergency.age}` : '',
+        emergency.conditions?.length ? `Conditions: ${emergency.conditions.join(', ')}` : '',
+      ].filter(Boolean).join('\n')
+
+      const msg = `🆘 RAKSHAK EMERGENCY ALERT 🆘\n\nVehicle: ${userData.vehicle}\nOwner: ${userData.name}\nRakshak ID: ${userData.generatedId}\n\n⚠️ This vehicle needs immediate help.\n\n${medicalInfo ? `MEDICAL INFO:\n${medicalInfo}\n\n` : ''}— Rakshak Emergency Response`
+      recordScan()
+      window.location.href = `https://api.whatsapp.com/send?phone=91${iceContact}&text=${encodeURIComponent(msg)}`
+    } else {
+      // No ICE contact — log in Firebase
+      handleSendMessage({ label: 'EMERGENCY SOS — No ICE contact set', type: 'emergency' })
+    }
   }
 
-  const handleAccidentAlert = () => {
-    if (!userData) return
-    // Accident/Emergency alerts go to ICE contact first
-    const contactNum = userData.emergency?.iceContact1 || userData.whatsapp || userData.mobile
-    const emergency = userData.emergency || {}
-    const medicalInfo = [
-      emergency.bloodGroup && emergency.bloodGroup !== 'Select' ? `Blood Group: ${emergency.bloodGroup}` : '',
-      emergency.age ? `Age: ${emergency.age}` : '',
-      emergency.conditions?.length ? `Conditions: ${emergency.conditions.join(', ')}` : '',
-    ].filter(Boolean).join('\n')
-
-    const msg = `🆘 RAKSHAK EMERGENCY ALERT 🆘\n\nVehicle: ${userData.vehicle}\nOwner: ${userData.name}\n\n⚠️ This vehicle has been involved in an accident/emergency.\n\n${medicalInfo ? `MEDICAL INFO:\n${medicalInfo}\n\n` : ''}Please respond immediately.\n\n— Sent via Rakshak Emergency Scan`
-    sendWhatsApp(contactNum, msg)
-  }
-
-  const handleSOS = () => {
-    if (!userData) return
-    const contactNum = userData.emergency?.iceContact1 || userData.whatsapp || userData.mobile
-    const msg = `🚨🚨 SOS ALERT — RAKSHAK 🚨🚨\n\nVehicle: ${userData.vehicle}\nOwner: ${userData.name}\nRakshak ID: ${userData.generatedId}\n\nThis is an emergency SOS alert triggered by a QR scan. The vehicle owner may need immediate help.\n\nPlease contact them or emergency services immediately.\n\n— Rakshak Emergency Response System`
-    sendWhatsApp(contactNum, msg)
-  }
-
-  const handleCallOwner = () => {
-    if (!userData) return
-    const contactNum = userData.whatsapp || userData.mobile
-    window.location.href = `https://api.whatsapp.com/send?phone=91${contactNum}`
-  }
-
-  // Loading
+  // ===== LOADING =====
   if (loading) {
     return (
       <div className="scan-page">
@@ -126,8 +175,8 @@ const ScannerPage = () => {
     )
   }
 
-  // Error
-  if (error) {
+  // ===== ERROR =====
+  if (error && screen !== 'rate-limited') {
     return (
       <div className="scan-page">
         <div className="scan-card">
@@ -136,9 +185,7 @@ const ScannerPage = () => {
           </div>
           <h2 className="scan-brand">RAKSHAK</h2>
           <p className="scan-brand-sub">EMERGENCY RESPONSE SYSTEM</p>
-          <div className="scan-error-box">
-            <p>{error}</p>
-          </div>
+          <div className="scan-error-box"><p>{error}</p></div>
           <div className="scan-promo">
             <div className="scan-promo-left">
               <span className="scan-promo-label">GET YOURS</span>
@@ -166,52 +213,76 @@ const ScannerPage = () => {
           <span className="scan-vehicle-num">{userData.vehicle}</span>
         </div>
 
-        {/* SOS Button */}
-        <button className="scan-sos-btn" onClick={handleSOS}>
-          <span className="scan-sos-icon">🆘</span>
-          <span>SEND SOS ALERT</span>
-        </button>
+        {/* Privacy Notice */}
+        <div className="scan-privacy-notice">
+          <span>🔒</span> Owner's number is protected. Messages are delivered securely via Rakshak.
+        </div>
 
-        {/* Contact Options */}
-        {contactMode === null ? (
+        {/* ===== MAIN SCREEN ===== */}
+        {screen === 'main' && (
           <>
-            {/* Get in Touch */}
-            <button className="scan-contact-btn" onClick={() => setContactMode('options')}>
+            {/* SOS Button */}
+            <button className="scan-sos-btn" onClick={handleEmergencySOS}>
+              <span className="scan-sos-icon">🆘</span>
+              <span>SEND SOS ALERT</span>
+            </button>
+
+            {/* Contact via predefined messages */}
+            <button className="scan-contact-btn" onClick={() => setScreen('messages')}>
               <span>📞</span> GET IN TOUCH WITH OWNER
             </button>
+
+            {/* Emergency Services */}
+            <div className="scan-emergency-row">
+              <a href="tel:100" className="scan-em-btn"><span>🚔</span> POLICE (100)</a>
+              <a href="tel:108" className="scan-em-btn"><span>🚑</span> AMBULANCE (108)</a>
+            </div>
           </>
-        ) : contactMode === 'options' ? (
-          <div className="scan-options">
-            <p className="scan-options-title">What's the situation?</p>
-            <button className="scan-option-btn scan-option-parking" onClick={handleWrongParking}>
-              <span>🅿️</span> Wrong Parking
-            </button>
-            <button className="scan-option-btn scan-option-accident" onClick={handleAccidentAlert}>
-              <span>🚨</span> Accident / Emergency
-            </button>
-            <button className="scan-option-back" onClick={() => setContactMode(null)}>
-              ← Back
-            </button>
+        )}
+
+        {/* ===== MESSAGE SELECTION ===== */}
+        {screen === 'messages' && (
+          <div className="scan-messages-screen">
+            <p className="scan-msg-title">What's the situation?</p>
+            <p className="scan-msg-subtitle">Select a message to send to the vehicle owner</p>
+
+            <div className="scan-msg-list">
+              {PREDEFINED_MESSAGES.map((msg) => (
+                <button
+                  key={msg.id}
+                  className={`scan-msg-btn scan-msg-${msg.type}`}
+                  onClick={() => handleSendMessage(msg)}
+                  disabled={sending}
+                >
+                  <span className="scan-msg-icon">{msg.icon}</span>
+                  <span>{msg.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <button className="scan-back-btn" onClick={() => setScreen('main')}>← Back</button>
           </div>
-        ) : null}
+        )}
 
-        {/* Direct Buttons */}
-        <button className="scan-call-btn" onClick={handleCallOwner}>
-          <span>📞</span> CALL OWNER
-        </button>
-        <button className="scan-wa-btn" onClick={handleCallOwner}>
-          <span>💬</span> WHATSAPP
-        </button>
+        {/* ===== SENT CONFIRMATION ===== */}
+        {screen === 'sent' && (
+          <div className="scan-sent-screen">
+            <div className="scan-sent-icon">✅</div>
+            <h3>Message Sent!</h3>
+            <p>The vehicle owner has been notified securely via Rakshak. They will respond if needed.</p>
+            <button className="scan-done-btn" onClick={() => setScreen('main')}>Done</button>
+          </div>
+        )}
 
-        {/* Emergency Services */}
-        <div className="scan-emergency-row">
-          <a href="tel:100" className="scan-em-btn">
-            <span>🚔</span> POLICE (100)
-          </a>
-          <a href="tel:108" className="scan-em-btn">
-            <span>🚑</span> AMBULANCE (108)
-          </a>
-        </div>
+        {/* ===== RATE LIMITED ===== */}
+        {screen === 'rate-limited' && (
+          <div className="scan-sent-screen">
+            <div className="scan-sent-icon">⏳</div>
+            <h3>Too Many Attempts</h3>
+            <p>{error}</p>
+            <button className="scan-done-btn" onClick={() => { setError(''); setScreen('main') }}>OK</button>
+          </div>
+        )}
 
         {/* Promo */}
         <div className="scan-promo">
@@ -222,7 +293,6 @@ const ScannerPage = () => {
           <Link to="/" className="scan-promo-btn">BUY NOW</Link>
         </div>
 
-        {/* Footer */}
         <p className="scan-footer">&copy; 2026 ABHISHEK TECHNOLOGY INDIA PRIVATE LIMITED</p>
       </div>
     </div>
