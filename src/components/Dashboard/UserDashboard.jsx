@@ -38,6 +38,60 @@ const UserDashboard = () => {
   // Always use current domain for QR — fixes localhost QR codes
   const qrLink = `${window.location.origin}/scan?id=${currentUser.generatedId}`
   const qrUrl = generateQRCodeUrl(qrLink, 200)
+  const qrUrlHD = generateQRCodeUrl(qrLink, 600) // High-res for print/download
+
+  const handleDownloadQR = async () => {
+    try {
+      const res = await fetch(qrUrlHD)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Rakshak-${currentUser.vehicle}-QR.png`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      window.open(qrUrlHD, '_blank')
+    }
+  }
+
+  const handlePrintQR = () => {
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Rakshak QR - ${currentUser.vehicle}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; font-family: -apple-system, sans-serif; }
+            .card { text-align: center; padding: 40px; border: 3px solid #F28C38; border-radius: 20px; max-width: 400px; }
+            .logo { font-size: 28px; font-weight: 900; color: #F28C38; letter-spacing: 3px; margin-bottom: 4px; }
+            .tagline { font-size: 10px; color: #888; letter-spacing: 2px; margin-bottom: 24px; }
+            .qr img { width: 280px; height: 280px; }
+            .vehicle { font-size: 24px; font-weight: 900; color: #F28C38; letter-spacing: 3px; margin-top: 20px; }
+            .scan-text { font-size: 11px; color: #888; margin-top: 8px; letter-spacing: 1px; }
+            .id { font-size: 12px; color: #aaa; margin-top: 12px; }
+            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="logo">RAKSHAK</div>
+            <div class="tagline">HAR GAADI KA GUARDIAN</div>
+            <div class="qr"><img src="${qrUrlHD}" /></div>
+            <div class="vehicle">${currentUser.vehicle}</div>
+            <div class="scan-text">SCAN TO INFORM VEHICLE OWNER</div>
+            <div class="id">${currentUser.generatedId}</div>
+          </div>
+          <script>
+            const img = document.querySelector('img');
+            img.onload = () => { window.print(); };
+          </script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
 
   const regDate = currentUser.timestamp
     ? new Date(currentUser.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -198,6 +252,10 @@ const UserDashboard = () => {
           </div>
           <p className="db-qr-vnum">{currentUser.vehicle}</p>
           <p className="db-qr-hint">Scan to inform vehicle owner</p>
+          <div className="db-qr-actions">
+            <button className="db-qr-btn" onClick={handleDownloadQR}>⬇️ Download</button>
+            <button className="db-qr-btn db-qr-btn-print" onClick={handlePrintQR}>🖨️ Print</button>
+          </div>
         </div>
 
         <div className="db-info-card">
