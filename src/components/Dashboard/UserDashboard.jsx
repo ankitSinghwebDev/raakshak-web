@@ -35,7 +35,8 @@ const UserDashboard = () => {
     }
   }
 
-  const qrLink = currentUser.qrLink || `${window.location.origin}/scan?id=${currentUser.generatedId}`
+  // Always use current domain for QR — fixes localhost QR codes
+  const qrLink = `${window.location.origin}/scan?id=${currentUser.generatedId}`
   const qrUrl = generateQRCodeUrl(qrLink, 200)
 
   const regDate = currentUser.timestamp
