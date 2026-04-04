@@ -27,6 +27,10 @@ const UserDashboard = () => {
   const [vehicleDetailsOpen, setVehicleDetailsOpen] = useState(false)
   const [myVehiclesOpen, setMyVehiclesOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
+  const [notifBannerDismissed, setNotifBannerDismissed] = useState(false)
+  const [notifPermission, setNotifPermission] = useState(
+    'Notification' in window ? Notification.permission : 'unsupported'
+  )
   usePushNotifications(currentUser)
   const [recentScans, setRecentScans] = useState([])
   const [totalScans, setTotalScans] = useState(0)
@@ -234,6 +238,54 @@ const UserDashboard = () => {
         </div>
         <button className="db-nav-logout" onClick={handleLogout}>LOGOUT</button>
       </nav>
+
+      {/* ===== NOTIFICATION BANNER ===== */}
+      {!notifBannerDismissed && (
+        <div className={`db-notif-banner ${notifPermission === 'denied' ? 'db-notif-banner--denied' : notifPermission === 'granted' ? 'db-notif-banner--granted' : ''}`}>
+          <div className="db-notif-banner-content">
+            <span className="db-notif-banner-icon">
+              {notifPermission === 'denied' ? '🚫' : notifPermission === 'granted' ? '✅' : '🔔'}
+            </span>
+            <div className="db-notif-banner-text">
+              {notifPermission === 'denied' ? (
+                <>
+                  <strong>Notifications Blocked</strong>
+                  <p>You have blocked notifications. You will miss important alerts like parking warnings, emergency SOS & vehicle scan updates.</p>
+                  <p className="db-notif-banner-help">To enable: Open browser settings &gt; Site Settings &gt; Notifications &gt; Allow for this site, then refresh the page.</p>
+                </>
+              ) : notifPermission === 'granted' ? (
+                <>
+                  <strong>Notifications Active</strong>
+                  <p>You're all set! You'll receive instant alerts when someone scans your QR.</p>
+                </>
+              ) : notifPermission === 'unsupported' ? (
+                <>
+                  <strong>Notifications Not Supported</strong>
+                  <p>Your browser does not support notifications. Please use Chrome, Edge, or Firefox for the best experience.</p>
+                </>
+              ) : (
+                <>
+                  <strong>Enable Notifications</strong>
+                  <p>Keep notifications ON to receive instant alerts when someone scans your QR — parking alerts, emergency SOS & more.</p>
+                </>
+              )}
+            </div>
+            {notifPermission === 'default' && (
+              <button className="db-notif-banner-btn" onClick={() => {
+                Notification.requestPermission().then((p) => {
+                  setNotifPermission(p)
+                  if (p === 'granted') {
+                    toast.success('Notifications enabled!')
+                  }
+                })
+              }}>
+                Allow
+              </button>
+            )}
+            <button className="db-notif-banner-close" onClick={() => setNotifBannerDismissed(true)}>&times;</button>
+          </div>
+        </div>
+      )}
 
       {/* ===== HERO CARD ===== */}
       <section className="db-hero" onClick={() => setVehicleDetailsOpen(!vehicleDetailsOpen)} style={{ cursor: 'pointer' }}>
