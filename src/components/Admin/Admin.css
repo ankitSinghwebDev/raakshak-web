@@ -98,7 +98,7 @@
 .adm-login-page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--bg-primary);
+  background: #060606;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,25 +110,28 @@
   width: 100%;
   text-align: center;
   padding: 32px 24px;
-  background: var(--bg-login-card);
-  border: 2px solid var(--accent);
+  background: #0c0c0c;
+  border: 2px solid #F28C38;
   border-radius: 24px;
-  box-shadow: 0 0 40px var(--shadow-login);
+  box-shadow: 0 0 50px rgba(242, 140, 56, 0.15);
 }
 
 .adm-login-icon { font-size: 48px; margin-bottom: 12px; }
+.adm-login-logo { width: 70px; border-radius: 16px; }
 .adm-login-card h1 { color: var(--text-primary); font-size: 22px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; }
 .adm-login-card > p { color: var(--text-dim); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px; }
 
 .adm-field { margin-bottom: 14px; text-align: left; }
 .adm-field label { display: block; color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
-.adm-field input {
-  width: 100%; padding: 14px; background: var(--bg-login-input); border: 1px solid var(--border-input);
-  border-radius: 12px; color: var(--accent); font-weight: bold; text-align: center;
+.adm-field input,
+.adm-field .pwd-input {
+  width: 100%; padding: 14px; background: #080808; border: 1.5px solid #333;
+  border-radius: 12px; color: #F28C38; font-weight: bold; text-align: center;
   font-size: 16px; outline: none; box-sizing: border-box;
   -webkit-appearance: none;
 }
-.adm-field input:focus { border-color: var(--accent); }
+.adm-field input:focus,
+.adm-field .pwd-input:focus { border-color: #F28C38; }
 
 .adm-login-btn {
   width: 100%; padding: 16px; background: linear-gradient(90deg, #F28C38, #ff6a00);
@@ -138,7 +141,65 @@
 }
 .adm-login-btn:disabled { opacity: 0.6; }
 .adm-login-btn:active { transform: scale(0.98); }
-.adm-login-footer { color: var(--text-faint); font-size: 10px; margin-top: 20px; }
+
+/* Forgot Password Link */
+.adm-forgot-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  min-height: 44px;
+}
+.adm-forgot-link:active {
+  color: #F28C38;
+}
+
+/* OTP Input */
+.adm-otp-input {
+  font-size: 24px !important;
+  letter-spacing: 10px !important;
+  color: #F28C38 !important;
+  font-weight: 900 !important;
+}
+
+.adm-otp-timer {
+  color: #555;
+  font-size: 11px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.adm-login-footer { color: #444; font-size: 10px; margin-top: 20px; }
+
+.adm-home-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: none;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #888;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  min-height: 44px;
+}
+.adm-home-link:active {
+  border-color: #F28C38;
+  color: #F28C38;
+}
 
 .adm-seed-btn {
   margin-top: 16px; padding: 12px 20px; background: none;
@@ -306,6 +367,72 @@
 }
 .adm-dashboard .ant-card-body {
   padding: 16px !important;
+}
+
+/* Ant Design Switch — Dark Theme Fix */
+.adm .ant-switch {
+  min-width: 52px;
+  height: 28px;
+  background: #333;
+  border: none;
+}
+.adm .ant-switch-checked {
+  background: #F28C38 !important;
+}
+.adm .ant-switch-handle {
+  width: 22px;
+  height: 22px;
+  top: 3px;
+  inset-inline-start: 3px;
+}
+.adm .ant-switch-handle::before {
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.adm .ant-switch-checked .ant-switch-handle {
+  inset-inline-start: calc(100% - 25px);
+}
+.adm .ant-switch-inner {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* Ant Design InputNumber — Dark Theme Fix */
+.adm .ant-input-number {
+  background: var(--bg-input) !important;
+  border-color: var(--border-input) !important;
+  color: var(--text-primary) !important;
+  border-radius: 10px !important;
+}
+.adm .ant-input-number:hover,
+.adm .ant-input-number-focused {
+  border-color: var(--accent) !important;
+}
+.adm .ant-input-number-input {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  text-align: center;
+}
+.adm .ant-input-number-handler-wrap {
+  background: var(--bg-input);
+  border-color: var(--border-input);
+}
+
+/* Light mode overrides */
+.adm.adm-light .ant-switch {
+  background: #d9d9d9;
+}
+.adm.adm-light .ant-switch-checked {
+  background: #F28C38 !important;
+}
+.adm.adm-light .ant-input-number {
+  background: #fff !important;
+  border-color: #d9d9d9 !important;
+  color: #000 !important;
+}
+.adm.adm-light .ant-input-number-input {
+  color: #000 !important;
 }
 .adm-dashboard .ant-statistic-title {
   color: var(--text-dim) !important;
@@ -773,6 +900,44 @@
 .adm-table-fixed th,
 .adm-table-fixed td {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  position: relative;
+}
+
+/* Tooltip on hover for truncated cells */
+.adm-table-fixed td:hover {
+  overflow: visible;
+  z-index: 10;
+}
+
+.adm-table-fixed td:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 8px;
+  top: 100%;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: normal;
+  max-width: 280px;
+  word-break: break-word;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-input);
+  z-index: 100;
+  pointer-events: none;
+  animation: tooltipIn 0.15s ease-out;
+}
+
+/* Only show tooltip if content is actually truncated (has title attr) */
+.adm-table-fixed td:not([title]):hover::after {
+  display: none;
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .adm-table thead { background: var(--table-header-bg); }
 .adm-table th {
@@ -1198,3 +1363,77 @@
 .adm.adm-light .adm-stat-card {
   border-color: #e5e7eb;
 }
+
+
+/* ===== ADMIN MODAL ===== */
+.adm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.adm-modal {
+  background: #0c0c0c;
+  border: 1px solid rgba(242, 140, 56, 0.2);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+.adm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+
+.adm-modal-title {
+  color: #F28C38;
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-modal-close {
+  background: none;
+  border: 1px solid #333;
+  color: #888;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.adm-modal-close:active {
+  border-color: #F28C38;
+  color: #F28C38;
+}
+
+.adm-modal-body {
+  padding: 20px 24px 24px;
+}
+
+.adm.adm-light .adm-modal {
+  background: #fff;
+  border-color: #e5e7eb;
+}
+
+.adm.adm-light .adm-modal-close {
+  border-color: #d1d5db;
+  color: #666;
+}
+

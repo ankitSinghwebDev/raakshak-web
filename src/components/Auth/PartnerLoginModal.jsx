@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
+import PasswordInput from '../ui/PasswordInput'
 import './LoginModal.css'
 
 const PartnerLoginModal = ({ open, onClose }) => {
@@ -37,8 +38,7 @@ const PartnerLoginModal = ({ open, onClose }) => {
             required
             className="partner-input"
           />
-          <input
-            type="password"
+          <PasswordInput
             placeholder="PASSWORD"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

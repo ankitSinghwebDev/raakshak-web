@@ -6,7 +6,8 @@ import {
   CheckCircleOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
-import { db, ref, get, update } from '../../config/firebase'
+import { db, ref, get, update, set } from '../../config/firebase'
+import { logAdminAction, ACTIONS } from '../../utils/auditLog'
 import { ListSkeleton } from './AdminSkeleton'
 
 const CustomerManagement = () => {
@@ -17,6 +18,9 @@ const CustomerManagement = () => {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
   const [exporting, setExporting] = useState(false)
+  const [editing, setEditing] = useState(null) // customer being edited
+  const [editForm, setEditForm] = useState({ name: '', mobile: '', whatsapp: '', vehicle: '' })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -61,6 +65,10 @@ const CustomerManagement = () => {
     try {
       await update(ref(db, `customers/${customer.key}`), { status: newStatus })
       setCustomers((prev) => prev.map((c) => c.key === customer.key ? { ...c, status: newStatus } : c))
+      await logAdminAction(
+        newStatus === 'Suspended' ? ACTIONS.CUSTOMER_SUSPENDED : ACTIONS.CUSTOMER_REACTIVATED,
+        customer.key, customer.vehicle, { name: customer.name, mobile: customer.mobile }
+      )
       toast.success(`${customer.vehicle} ${newStatus === 'Suspended' ? 'suspended' : 'reactivated'}`)
     } catch {
       toast.error('Failed to update')
@@ -96,6 +104,46 @@ const CustomerManagement = () => {
       toast.error('Export failed')
     } finally {
       setExporting(false)
+    }
+  }
+
+  const openEdit = (customer) => {
+    setEditing(customer)
+    setEditForm({
+      name: customer.name || '',
+      mobile: customer.mobile || '',
+      whatsapp: customer.whatsapp || customer.mobile || '',
+      vehicle: customer.vehicle || '',
+    })
+  }
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault()
+    if (!editing) return
+    setSaving(true)
+    try {
+      const changes = {}
+      if (editForm.name !== editing.name) changes.name = editForm.name.toUpperCase()
+      if (editForm.mobile !== editing.mobile) changes.mobile = editForm.mobile
+      if (editForm.whatsapp !== (editing.whatsapp || editing.mobile)) changes.whatsapp = editForm.whatsapp
+      if (editForm.vehicle !== editing.vehicle) changes.vehicle = editForm.vehicle.toUpperCase()
+
+      if (Object.keys(changes).length === 0) {
+        toast('No changes made')
+        setEditing(null)
+        setSaving(false)
+        return
+      }
+
+      await update(ref(db, `customers/${editing.key}`), changes)
+      setCustomers((prev) => prev.map((c) => c.key === editing.key ? { ...c, ...changes } : c))
+      await logAdminAction(ACTIONS.CUSTOMER_EDITED, editing.key, editing.vehicle, { changes })
+      toast.success(`${editing.vehicle} updated!`)
+      setEditing(null)
+    } catch {
+      toast.error('Failed to update')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -143,21 +191,22 @@ const CustomerManagement = () => {
           <tbody>
             {filtered.map((c) => (
               <tr key={c.key} className={c.status === 'Suspended' ? 'adm-row-suspended' : ''}>
-                <td className="adm-td-name">{c.name}</td>
-                <td className="adm-td-vehicle">{c.vehicle}</td>
-                <td>{c.mobile}</td>
-                <td className="adm-td-id">{c.generatedId}</td>
-                <td><Tag color={c.plan === 'Lite Plan' ? 'default' : 'orange'}>{c.plan}</Tag></td>
-                <td><Tag color={c.status === 'Suspended' ? 'red' : 'green'}>{c.status}</Tag></td>
-                <td>₹{c.amount}</td>
-                <td>{c.coupon || '—'}</td>
-                <td className="adm-td-date">{c.timestamp ? new Date(c.timestamp).toLocaleDateString('en-IN') : '—'}</td>
+                <td className="adm-td-name" title={c.name}>{c.name}</td>
+                <td className="adm-td-vehicle" title={c.vehicle}>{c.vehicle}</td>
+                <td title={c.mobile}>{c.mobile}</td>
+                <td className="adm-td-id" title={c.generatedId}>{c.generatedId}</td>
+                <td title={c.plan}><Tag color={c.plan === 'Lite Plan' ? 'default' : 'orange'}>{c.plan}</Tag></td>
+                <td title={c.status}><Tag color={c.status === 'Suspended' ? 'red' : 'green'}>{c.status}</Tag></td>
+                <td title={`₹${c.amount}`}>₹{c.amount}</td>
+                <td title={c.coupon || '—'}>{c.coupon || '—'}</td>
+                <td className="adm-td-date" title={c.timestamp ? new Date(c.timestamp).toLocaleString('en-IN') : '—'}>{c.timestamp ? new Date(c.timestamp).toLocaleDateString('en-IN') : '—'}</td>
                 <td>
                   <div className="adm-actions">
-                    <button className="adm-btn-sm" onClick={() => setSelected(selected?.key === c.key ? null : c)}>
+                    <button className="adm-btn-sm" onClick={() => setSelected(selected?.key === c.key ? null : c)} title="View">
                       {selected?.key === c.key ? <CloseOutlined /> : <EyeOutlined />}
                     </button>
-                    <button className={`adm-btn-sm ${c.status === 'Suspended' ? 'adm-btn-green' : 'adm-btn-red'}`} onClick={() => handleSuspend(c)}>
+                    <button className="adm-btn-sm" onClick={() => openEdit(c)} title="Edit">✏️</button>
+                    <button className={`adm-btn-sm ${c.status === 'Suspended' ? 'adm-btn-green' : 'adm-btn-red'}`} onClick={() => handleSuspend(c)} title={c.status === 'Suspended' ? 'Reactivate' : 'Suspend'}>
                       {c.status === 'Suspended' ? <CheckCircleOutlined /> : <StopOutlined />}
                     </button>
                   </div>
@@ -242,6 +291,42 @@ const CustomerManagement = () => {
         ))}
         {filtered.length === 0 && <p className="adm-empty">No customers found</p>}
       </div>
+
+      {/* Edit Customer Modal */}
+      {editing && (
+        <div className="adm-modal-overlay" onClick={() => setEditing(null)}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h4 className="adm-modal-title">✏️ Edit Customer</h4>
+              <button className="adm-modal-close" onClick={() => setEditing(null)}>✕</button>
+            </div>
+            <form className="adm-modal-body" onSubmit={handleSaveEdit}>
+              <p style={{ color: '#F28C38', fontSize: '13px', fontWeight: 900, marginBottom: '16px', letterSpacing: '1px' }}>
+                {editing.vehicle} — {editing.generatedId}
+              </p>
+              <div className="adm-field">
+                <label>Owner Name</label>
+                <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required />
+              </div>
+              <div className="adm-field">
+                <label>Mobile Number</label>
+                <input value={editForm.mobile} onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })} maxLength={10} inputMode="numeric" required />
+              </div>
+              <div className="adm-field">
+                <label>WhatsApp Number</label>
+                <input value={editForm.whatsapp} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value.replace(/\D/g, '').slice(0, 10) })} maxLength={10} inputMode="numeric" required />
+              </div>
+              <div className="adm-field">
+                <label>Vehicle Number</label>
+                <input value={editForm.vehicle} onChange={(e) => setEditForm({ ...editForm, vehicle: e.target.value.toUpperCase() })} required />
+              </div>
+              <button type="submit" className="adm-login-btn" disabled={saving} style={{ marginTop: '8px' }}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

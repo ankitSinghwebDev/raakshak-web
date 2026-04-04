@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
+import { logAdminAction, ACTIONS } from '../../utils/auditLog'
 import { ListSkeleton } from './AdminSkeleton'
 
 const PartnerManagement = () => {
@@ -15,6 +16,9 @@ const PartnerManagement = () => {
   const [showAdd, setShowAdd] = useState(false)
   const [newPartner, setNewPartner] = useState({ name: '', code: '', comm: '' })
   const [exporting, setExporting] = useState(false)
+  const [viewingPartner, setViewingPartner] = useState(null) // partner whose customers we're viewing
+  const [partnerCustomers, setPartnerCustomers] = useState([])
+  const [loadingCustomers, setLoadingCustomers] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -48,6 +52,7 @@ const PartnerManagement = () => {
         status: 'active',
         createdAt: new Date().toISOString(),
       })
+      await logAdminAction(ACTIONS.PARTNER_CREATED, newPartner.code, newPartner.name, { comm: newPartner.comm })
       toast.success('Partner added!')
       setShowAdd(false)
       setNewPartner({ name: '', code: '', comm: '' })
@@ -63,6 +68,10 @@ const PartnerManagement = () => {
     try {
       await update(ref(db, `partners/${partner.key}`), { status: newStatus })
       setPartners((prev) => prev.map((p) => p.key === partner.key ? { ...p, status: newStatus } : p))
+      await logAdminAction(
+        newStatus === 'active' ? ACTIONS.PARTNER_ACTIVATED : ACTIONS.PARTNER_DEACTIVATED,
+        partner.key, partner.name, { code: partner.code }
+      )
       toast.success(`${partner.name} ${newStatus}`)
     } catch {
       toast.error('Failed')
@@ -71,11 +80,37 @@ const PartnerManagement = () => {
 
   const markPaid = async (partner) => {
     try {
+      const paidAmount = partner.pendingComm || 0
       await update(ref(db, `partners/${partner.key}`), { pendingComm: 0, lastPaidAt: new Date().toISOString() })
+      // Save payout record
+      await push(ref(db, `payoutHistory/${partner.key}`), {
+        amount: paidAmount,
+        partnerName: partner.name,
+        code: partner.code,
+        paidAt: new Date().toISOString(),
+        paidBy: JSON.parse(sessionStorage.getItem('rakshak_admin') || '{}').name || 'Admin',
+      })
       setPartners((prev) => prev.map((p) => p.key === partner.key ? { ...p, pendingComm: 0 } : p))
-      toast.success(`Commission paid for ${partner.name}`)
+      await logAdminAction(ACTIONS.PARTNER_COMMISSION_PAID, partner.key, partner.name, { amount: paidAmount })
+      toast.success(`₹${paidAmount} commission paid for ${partner.name}`)
     } catch {
       toast.error('Failed')
+    }
+  }
+
+  const viewPartnerCustomers = async (partner) => {
+    setViewingPartner(partner)
+    setLoadingCustomers(true)
+    try {
+      const snap = await get(ref(db, 'customers'))
+      if (snap.exists()) {
+        const all = Object.entries(snap.val()).map(([k, v]) => ({ key: k, ...v }))
+        setPartnerCustomers(all.filter((c) => c.coupon?.toUpperCase() === partner.code?.toUpperCase()))
+      }
+    } catch {
+      toast.error('Failed to load customers')
+    } finally {
+      setLoadingCustomers(false)
     }
   }
 
@@ -164,6 +199,7 @@ const PartnerManagement = () => {
                         <DollarOutlined />
                       </button>
                     )}
+                    <button className="adm-btn-sm" onClick={() => viewPartnerCustomers(p)} title="View Customers">👥</button>
                   </div>
                 </td>
               </tr>
@@ -224,6 +260,46 @@ const PartnerManagement = () => {
         ))}
         {partners.length === 0 && <p className="adm-empty">No partners yet</p>}
       </div>
+
+      {/* Partner Customers Modal */}
+      {viewingPartner && (
+        <div className="adm-modal-overlay" onClick={() => setViewingPartner(null)}>
+          <div className="adm-modal" style={{ maxWidth: '560px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h4 className="adm-modal-title">👥 Customers — {viewingPartner.name} ({viewingPartner.code})</h4>
+              <button className="adm-modal-close" onClick={() => setViewingPartner(null)}>✕</button>
+            </div>
+            <div className="adm-modal-body">
+              {loadingCustomers ? (
+                <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Loading...</p>
+              ) : partnerCustomers.length === 0 ? (
+                <p style={{ textAlign: 'center', color: '#666', padding: '20px' }}>No customers found for this coupon code</p>
+              ) : (
+                <>
+                  <p style={{ color: '#888', fontSize: '12px', marginBottom: '14px' }}>{partnerCustomers.length} customers acquired</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto' }}>
+                    {partnerCustomers.map((c) => (
+                      <div key={c.key} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ color: '#fff', fontWeight: 900, fontSize: '14px' }}>{c.name}</span>
+                          <Tag color={c.status === 'Suspended' ? 'red' : 'green'}>{c.status}</Tag>
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                          <span style={{ color: '#F28C38', fontWeight: 900, fontSize: '13px' }}>{c.vehicle}</span>
+                          <span style={{ color: '#888', fontSize: '12px' }}>{c.mobile}</span>
+                          <span style={{ color: '#666', fontSize: '11px' }}>{c.plan}</span>
+                          <span style={{ color: '#666', fontSize: '11px' }}>₹{c.amount}</span>
+                          <span style={{ color: '#555', fontSize: '10px' }}>{c.timestamp ? new Date(c.timestamp).toLocaleDateString('en-IN') : ''}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

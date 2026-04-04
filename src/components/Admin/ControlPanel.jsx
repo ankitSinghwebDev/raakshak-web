@@ -6,6 +6,7 @@ import {
   SaveOutlined, SettingOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { db, ref, get, set } from '../../config/firebase'
+import { logAdminAction, ACTIONS } from '../../utils/auditLog'
 import { SettingsSkeleton } from './AdminSkeleton'
 
 const { Text } = Typography
@@ -43,6 +44,7 @@ const ControlPanel = () => {
     setSaving(true)
     try {
       await set(ref(db, 'config'), config)
+      await logAdminAction(ACTIONS.CONFIG_UPDATED, 'config', 'System Config', config)
       toast.success('Configuration saved!')
     } catch {
       toast.error('Failed to save')

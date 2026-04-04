@@ -44,4 +44,9 @@ export { messaging, getToken, onMessage };
 // Re-export database utilities
 export { ref, push, set, get, update, query, orderByChild, equalTo, increment, onValue };
 
+// Cloud Functions (callable)
+import { getFunctions, httpsCallable } from 'firebase/functions'
+export const functions = getFunctions(app)
+export { httpsCallable }
+
 export default app;
