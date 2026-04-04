@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Card, Row, Col, Tag, Table, Divider, Typography } from 'antd'
+import { Card, Row, Col, Tag, Table, Statistic, Divider, Typography } from 'antd'
 import {
   WalletOutlined, DollarOutlined, CalendarOutlined,
   BankOutlined, PercentageOutlined,
