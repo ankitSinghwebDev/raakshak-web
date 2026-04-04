@@ -1,4 +1,5 @@
 import { useState } from 'react'
+<<<<<<< HEAD
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { LockOutlined, IdcardOutlined, LoadingOutlined, HomeOutlined, MailOutlined, ArrowLeftOutlined } from '@ant-design/icons'
@@ -10,10 +11,20 @@ import './Admin.css'
 
 const AdminLogin = ({ onLogin }) => {
   // Login state
+=======
+import toast from 'react-hot-toast'
+import { SafetyCertificateOutlined, LockOutlined, IdcardOutlined, LoadingOutlined } from '@ant-design/icons'
+import { db, ref, get } from '../../config/firebase'
+import { verifyPassword } from '../../utils/hashPassword'
+import './Admin.css'
+
+const AdminLogin = ({ onLogin }) => {
+>>>>>>> main
   const [empId, setEmpId] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+<<<<<<< HEAD
   // Forgot password state
   const [screen, setScreen] = useState('login') // login | forgot | otp | reset
   const [forgotEmpId, setForgotEmpId] = useState('')
@@ -25,12 +36,15 @@ const AdminLogin = ({ onLogin }) => {
   const [fpLoading, setFpLoading] = useState(false)
 
   // ===== LOGIN =====
+=======
+>>>>>>> main
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!empId || !password) return
     setLoading(true)
 
     try {
+<<<<<<< HEAD
       const snap = await get(ref(db, 'admins'))
       if (snap.exists()) {
         const admins = snap.val()
@@ -39,15 +53,45 @@ const AdminLogin = ({ onLogin }) => {
           if (admin.empId?.toLowerCase() !== empId.toLowerCase()) continue
           const isValid = await verifyPassword(password, admin.password)
           if (isValid) { matchKey = key; matchData = admin; break }
+=======
+      const adminRef = ref(db, 'admins')
+      const snap = await get(adminRef)
+
+      if (snap.exists()) {
+        const admins = snap.val()
+
+        // Find admin by empId (case-insensitive)
+        let matchKey = null, matchData = null
+        for (const [key, admin] of Object.entries(admins)) {
+          if (admin.empId?.toLowerCase() !== empId.toLowerCase()) continue
+
+          // Verify hashed password
+          const isValid = await verifyPassword(password, admin.password)
+          if (isValid) {
+            matchKey = key
+            matchData = admin
+            break
+          }
+>>>>>>> main
         }
 
         if (matchKey && matchData) {
           if (matchData.status === 'suspended') {
+<<<<<<< HEAD
             toast.error('Account suspended. Contact Super Admin.')
             setLoading(false)
             return
           }
           const adminData = { key: matchKey, ...matchData, loginTime: new Date().toISOString() }
+=======
+            toast.error('Your account has been suspended. Contact Super Admin.')
+            setLoading(false)
+            return
+          }
+
+          const adminData = { key: matchKey, ...matchData, loginTime: new Date().toISOString() }
+          // Don't store password hash in session
+>>>>>>> main
           delete adminData.password
           sessionStorage.setItem('rakshak_admin', JSON.stringify(adminData))
           onLogin(adminData)
@@ -59,13 +103,18 @@ const AdminLogin = ({ onLogin }) => {
         toast.error('Admin system not configured')
       }
     } catch (err) {
+<<<<<<< HEAD
       console.error('Login error:', err)
+=======
+      console.error('Admin login error:', err)
+>>>>>>> main
       toast.error('Connection error. Try again.')
     } finally {
       setLoading(false)
     }
   }
 
+<<<<<<< HEAD
   // ===== SEND OTP =====
   const handleSendOTP = async (e) => {
     e.preventDefault()
@@ -250,6 +299,29 @@ const AdminLogin = ({ onLogin }) => {
             </button>
           </>
         )}
+=======
+  return (
+    <div className="adm-login-page">
+      <div className="adm-login-card">
+        <div className="adm-login-icon"><SafetyCertificateOutlined /></div>
+        <h1>Rakshak Admin</h1>
+        <p>Secure System Access</p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="adm-field">
+            <label><IdcardOutlined /> EMPLOYEE ID</label>
+            <input type="text" value={empId} onChange={(e) => setEmpId(e.target.value)} placeholder="Enter ID" required />
+          </div>
+          <div className="adm-field">
+            <label><LockOutlined /> PASSWORD</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter Password" required />
+          </div>
+          <button type="submit" className="adm-login-btn" disabled={loading}>
+            {loading ? <><LoadingOutlined /> Verifying...</> : <><LockOutlined /> Unlock Dashboard</>}
+          </button>
+        </form>
+        <p className="adm-login-footer">Protected by Rakshak Encryption</p>
+>>>>>>> main
       </div>
     </div>
   )

@@ -9,8 +9,12 @@ import {
   UsergroupAddOutlined, GlobalOutlined, TeamOutlined,
 } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
+<<<<<<< HEAD
 import { db, ref, get, update } from '../../config/firebase'
 import { logAdminAction } from '../../utils/auditLog'
+=======
+import { db, ref, get } from '../../config/firebase'
+>>>>>>> main
 import { DashboardSkeleton } from './AdminSkeleton'
 
 const { Text } = Typography
@@ -305,11 +309,16 @@ const SalesPanel = () => {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {data.pendingPayments.slice(0, 6).map((p) => (
+<<<<<<< HEAD
                       <div key={p.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+=======
+                      <div key={p.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+>>>>>>> main
                         <div>
                           <Text strong style={{ color: 'var(--text-primary)', fontSize: 13 }}>{p.name}</Text>
                           <br /><Text style={{ color: 'var(--text-dim)', fontSize: 11 }}>{p.vehicle}</Text>
                         </div>
+<<<<<<< HEAD
                         <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <div>
                             <Text strong style={{ color: 'var(--red)' }}>₹{p.amount}</Text>
@@ -335,6 +344,11 @@ const SalesPanel = () => {
                               setCustomers((prev) => prev.map((c) => c.key === p.key ? { ...c, status: 'Failed' } : c))
                             }}
                           >❌</button>
+=======
+                        <div style={{ textAlign: 'right' }}>
+                          <Text strong style={{ color: 'var(--red)' }}>₹{p.amount}</Text>
+                          <br /><Tag color="red" style={{ fontSize: 9 }}>{p.reason}</Tag>
+>>>>>>> main
                         </div>
                       </div>
                     ))}

@@ -8,7 +8,10 @@ import {
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { hashPassword } from '../../utils/hashPassword'
+<<<<<<< HEAD
 import PasswordInput from '../ui/PasswordInput'
+=======
+>>>>>>> main
 import { ListSkeleton } from './AdminSkeleton'
 
 const ROLE_HIERARCHY = { 'Super Admin': 4, 'Admin': 3, 'Support': 2, 'Viewer': 1 }
@@ -17,7 +20,11 @@ const AdminManagement = ({ currentAdmin }) => {
   const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
+<<<<<<< HEAD
   const [newAdmin, setNewAdmin] = useState({ name: '', empId: '', email: '', password: '', role: 'Admin' })
+=======
+  const [newAdmin, setNewAdmin] = useState({ name: '', empId: '', password: '', role: 'Admin' })
+>>>>>>> main
 
   const isSuperAdmin = currentAdmin?.role === 'Super Admin'
 
@@ -81,7 +88,10 @@ const AdminManagement = ({ currentAdmin }) => {
       await set(adminRef, {
         name: newAdmin.name.trim(),
         empId: newAdmin.empId.trim(),
+<<<<<<< HEAD
         email: newAdmin.email.trim().toLowerCase(),
+=======
+>>>>>>> main
         password: hashedPwd,
         role: newAdmin.role,
         status: 'active',
@@ -90,7 +100,11 @@ const AdminManagement = ({ currentAdmin }) => {
       })
       toast.success(`Admin "${newAdmin.name}" created!`)
       setShowAdd(false)
+<<<<<<< HEAD
       setNewAdmin({ name: '', empId: '', email: '', password: '', role: 'Admin' })
+=======
+      setNewAdmin({ name: '', empId: '', password: '', role: 'Admin' })
+>>>>>>> main
       fetchAdmins()
     } catch {
       toast.error('Failed to create admin')
@@ -204,6 +218,7 @@ const AdminManagement = ({ currentAdmin }) => {
                 </div>
               </div>
               <div className="adm-form-field">
+<<<<<<< HEAD
                 <label className="adm-form-label">Email (for password recovery)</label>
                 <input
                   className="adm-form-input"
@@ -219,6 +234,13 @@ const AdminManagement = ({ currentAdmin }) => {
                 <PasswordInput
                   className="adm-form-input"
                   placeholder="Min 6 characters"
+=======
+                <label className="adm-form-label">Password</label>
+                <input
+                  className="adm-form-input"
+                  placeholder="Min 6 characters"
+                  type="password"
+>>>>>>> main
                   value={newAdmin.password}
                   onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
                   required

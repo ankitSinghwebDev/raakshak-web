@@ -36,8 +36,7 @@ const AnimatedRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/admin" element={<AdminLayout />} />
-                <Route path="/admin/about" element={<About />} />
-
+        <Route path="/admin/about" element={<About />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

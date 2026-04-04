@@ -45,7 +45,6 @@ exports.onNewScan = functions.database
       const customer = customerSnap.val();
 
       if (!customer || !customer.fcmToken) return null;
-
       const typeEmoji = scanData.type === 'emergency' ? '🚨'
         : scanData.type === 'urgent' ? '⚠️' : '🅿️';
 

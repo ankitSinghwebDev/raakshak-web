@@ -98,7 +98,11 @@
 .adm-login-page {
   min-height: 100vh;
   min-height: 100dvh;
+<<<<<<< HEAD
   background: #060606;
+=======
+  background: var(--bg-primary);
+>>>>>>> main
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,6 +114,7 @@
   width: 100%;
   text-align: center;
   padding: 32px 24px;
+<<<<<<< HEAD
   background: #0c0c0c;
   border: 2px solid #F28C38;
   border-radius: 24px;
@@ -118,11 +123,21 @@
 
 .adm-login-icon { font-size: 48px; margin-bottom: 12px; }
 .adm-login-logo { width: 70px; border-radius: 16px; }
+=======
+  background: var(--bg-login-card);
+  border: 2px solid var(--accent);
+  border-radius: 24px;
+  box-shadow: 0 0 40px var(--shadow-login);
+}
+
+.adm-login-icon { font-size: 48px; margin-bottom: 12px; }
+>>>>>>> main
 .adm-login-card h1 { color: var(--text-primary); font-size: 22px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; }
 .adm-login-card > p { color: var(--text-dim); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px; }
 
 .adm-field { margin-bottom: 14px; text-align: left; }
 .adm-field label { display: block; color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
+<<<<<<< HEAD
 .adm-field input,
 .adm-field .pwd-input {
   width: 100%; padding: 14px; background: #080808; border: 1.5px solid #333;
@@ -132,6 +147,15 @@
 }
 .adm-field input:focus,
 .adm-field .pwd-input:focus { border-color: #F28C38; }
+=======
+.adm-field input {
+  width: 100%; padding: 14px; background: var(--bg-login-input); border: 1px solid var(--border-input);
+  border-radius: 12px; color: var(--accent); font-weight: bold; text-align: center;
+  font-size: 16px; outline: none; box-sizing: border-box;
+  -webkit-appearance: none;
+}
+.adm-field input:focus { border-color: var(--accent); }
+>>>>>>> main
 
 .adm-login-btn {
   width: 100%; padding: 16px; background: linear-gradient(90deg, #F28C38, #ff6a00);
@@ -141,6 +165,7 @@
 }
 .adm-login-btn:disabled { opacity: 0.6; }
 .adm-login-btn:active { transform: scale(0.98); }
+<<<<<<< HEAD
 
 /* Forgot Password Link */
 .adm-forgot-link {
@@ -200,6 +225,9 @@
   border-color: #F28C38;
   color: #F28C38;
 }
+=======
+.adm-login-footer { color: var(--text-faint); font-size: 10px; margin-top: 20px; }
+>>>>>>> main
 
 .adm-seed-btn {
   margin-top: 16px; padding: 12px 20px; background: none;
@@ -368,6 +396,7 @@
 .adm-dashboard .ant-card-body {
   padding: 16px !important;
 }
+<<<<<<< HEAD
 
 .adm-control-list {
   display: flex;
@@ -506,6 +535,8 @@
 .adm.adm-light .ant-input-number-input {
   color: #000 !important;
 }
+=======
+>>>>>>> main
 .adm-dashboard .ant-statistic-title {
   color: var(--text-dim) !important;
   font-size: 11px !important;
@@ -972,6 +1003,7 @@
 .adm-table-fixed th,
 .adm-table-fixed td {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+<<<<<<< HEAD
   position: relative;
 }
 
@@ -1010,6 +1042,8 @@
 @keyframes tooltipIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+=======
+>>>>>>> main
 }
 .adm-table thead { background: var(--table-header-bg); }
 .adm-table th {
@@ -1435,6 +1469,7 @@
 .adm.adm-light .adm-stat-card {
   border-color: #e5e7eb;
 }
+<<<<<<< HEAD
 
 
 /* ===== ADMIN MODAL ===== */
@@ -1508,3 +1543,5 @@
   border-color: #d1d5db;
   color: #666;
 }
+=======
+>>>>>>> main

@@ -6,7 +6,10 @@ import {
   SaveOutlined, SettingOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { db, ref, get, set } from '../../config/firebase'
+<<<<<<< HEAD
 import { logAdminAction, ACTIONS } from '../../utils/auditLog'
+=======
+>>>>>>> main
 import { SettingsSkeleton } from './AdminSkeleton'
 
 const { Text } = Typography
@@ -44,7 +47,10 @@ const ControlPanel = () => {
     setSaving(true)
     try {
       await set(ref(db, 'config'), config)
+<<<<<<< HEAD
       await logAdminAction(ACTIONS.CONFIG_UPDATED, 'config', 'System Config', config)
+=======
+>>>>>>> main
       toast.success('Configuration saved!')
     } catch {
       toast.error('Failed to save')
@@ -71,6 +77,7 @@ const ControlPanel = () => {
         {/* System Controls */}
         <Col xs={24} md={12}>
           <Card title={<><ControlOutlined /> System Controls</>} size="small" className="adm-chart-card">
+<<<<<<< HEAD
             <div className="adm-control-list">
               <div className="adm-control-row">
                 <div className="adm-control-copy">
@@ -138,6 +145,55 @@ const ControlPanel = () => {
                     onChange={(v) => updateConfig('pushNotificationsEnabled', v)}
                   />
                 </div>
+=======
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Maintenance Mode</Text>
+                  <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Disables all user access</Text>
+                </div>
+                <Switch
+                  checked={config.maintenanceMode}
+                  onChange={(v) => updateConfig('maintenanceMode', v)}
+                  checkedChildren="ON" unCheckedChildren="OFF"
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Registration</Text>
+                  <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Allow new customer signups</Text>
+                </div>
+                <Switch
+                  checked={config.registrationEnabled}
+                  onChange={(v) => updateConfig('registrationEnabled', v)}
+                  checkedChildren="ON" unCheckedChildren="OFF"
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>QR Scanner</Text>
+                  <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Allow public scan page</Text>
+                </div>
+                <Switch
+                  checked={config.scannerEnabled}
+                  onChange={(v) => updateConfig('scannerEnabled', v)}
+                  checkedChildren="ON" unCheckedChildren="OFF"
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Push Notifications</Text>
+                  <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>FCM notifications to owners</Text>
+                </div>
+                <Switch
+                  checked={config.pushNotificationsEnabled}
+                  onChange={(v) => updateConfig('pushNotificationsEnabled', v)}
+                  checkedChildren="ON" unCheckedChildren="OFF"
+                />
+>>>>>>> main
               </div>
             </div>
           </Card>
