@@ -2,19 +2,29 @@ import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import {
-  PlusOutlined, CloseOutlined, DownloadOutlined,
+  PlusOutlined, DownloadOutlined,
   CheckCircleOutlined, StopOutlined, DollarOutlined,
+  CopyOutlined, QrcodeOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { logAdminAction, ACTIONS } from '../../utils/auditLog'
+import { generateQRCodeUrl } from '../../utils/helpers'
 import { ListSkeleton } from './AdminSkeleton'
+
+const generateReferralCode = (name) => {
+  const prefix = name.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase()
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
+  return `RK-${prefix}-${rand}`
+}
 
 const PartnerManagement = () => {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showAdd, setShowAdd] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [newPartner, setNewPartner] = useState({ name: '', code: '', comm: '' })
+  const [addingPartner, setAddingPartner] = useState(false)
+  const [createdPartner, setCreatedPartner] = useState(null) // shows QR success modal
   const [exporting, setExporting] = useState(false)
   const [viewingPartner, setViewingPartner] = useState(null) // partner whose customers we're viewing
   const [partnerCustomers, setPartnerCustomers] = useState([])
@@ -40,26 +50,33 @@ const PartnerManagement = () => {
   const handleAddPartner = async (e) => {
     e.preventDefault()
     if (!newPartner.name || !newPartner.code) { toast.error('Fill all fields'); return }
+    setAddingPartner(true)
     try {
+      const referralCode = generateReferralCode(newPartner.name)
       const partnerRef = push(ref(db, 'partners'))
-      await set(partnerRef, {
+      const partnerData = {
         name: newPartner.name,
         code: newPartner.code.toUpperCase(),
+        referralCode,
         comm: parseFloat(newPartner.comm) || 0,
         totalSales: 0,
         totalRevenue: 0,
         pendingComm: 0,
         status: 'active',
         createdAt: new Date().toISOString(),
-      })
-      await logAdminAction(ACTIONS.PARTNER_CREATED, newPartner.code, newPartner.name, { comm: newPartner.comm })
+      }
+      await set(partnerRef, partnerData)
+      await logAdminAction(ACTIONS.PARTNER_CREATED, newPartner.code, newPartner.name, { comm: newPartner.comm, referralCode })
       toast.success('Partner added!')
-      setShowAdd(false)
+      setShowAddModal(false)
       setNewPartner({ name: '', code: '', comm: '' })
+      setCreatedPartner({ key: partnerRef.key, ...partnerData })
       const snap = await get(ref(db, 'partners'))
       if (snap.exists()) setPartners(Object.entries(snap.val()).map(([key, val]) => ({ key, ...val })))
     } catch {
       toast.error('Failed to add partner')
+    } finally {
+      setAddingPartner(false)
     }
   }
 
@@ -149,19 +166,113 @@ const PartnerManagement = () => {
         <button className="adm-icon-btn adm-icon-export" onClick={handleExportPartners} disabled={exporting} title="Download Excel">
           <DownloadOutlined />
         </button>
-        <button className="adm-add-btn" onClick={() => setShowAdd(!showAdd)}>
-          {showAdd ? <><CloseOutlined /> Cancel</> : <><PlusOutlined /> Add Partner</>}
+        <button className="adm-add-btn" onClick={() => setShowAddModal(true)}>
+          <PlusOutlined /> Add Partner
         </button>
       </div>
 
-      {/* Add Partner Form */}
-      {showAdd && (
-        <form className="adm-add-form" onSubmit={handleAddPartner}>
-          <input placeholder="Partner Name" value={newPartner.name} onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })} required />
-          <input placeholder="Coupon Code" value={newPartner.code} onChange={(e) => setNewPartner({ ...newPartner, code: e.target.value })} required />
-          <input placeholder="Commission %" type="number" value={newPartner.comm} onChange={(e) => setNewPartner({ ...newPartner, comm: e.target.value })} />
-          <button type="submit"><PlusOutlined /> Add Partner</button>
-        </form>
+      {/* Add Partner Modal */}
+      {showAddModal && (
+        <div className="adm-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h4 className="adm-modal-title"><PlusOutlined /> Add New Partner</h4>
+              <button className="adm-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
+            </div>
+            <div className="adm-modal-body">
+              <form onSubmit={handleAddPartner} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div className="adm-field">
+                  <label>Partner Name</label>
+                  <input placeholder="Enter partner's full name" value={newPartner.name} onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })} required className="adm-field-input" />
+                </div>
+                <div className="adm-field">
+                  <label>Coupon Code</label>
+                  <input placeholder="e.g. PARTNER50" value={newPartner.code} onChange={(e) => setNewPartner({ ...newPartner, code: e.target.value.toUpperCase() })} required className="adm-field-input" />
+                  <span style={{ color: '#666', fontSize: '10px', marginTop: '4px', display: 'block' }}>This code will be shared with customers for discounts</span>
+                </div>
+                <div className="adm-field">
+                  <label>Commission %</label>
+                  <input placeholder="e.g. 10" type="number" min="0" max="100" value={newPartner.comm} onChange={(e) => setNewPartner({ ...newPartner, comm: e.target.value })} className="adm-field-input" />
+                </div>
+                <p style={{ color: '#888', fontSize: '11px', background: 'rgba(242,140,56,0.08)', padding: '10px 14px', borderRadius: '10px', lineHeight: '1.5' }}>
+                  A unique <strong style={{ color: '#F28C38' }}>Referral Code</strong> & <strong style={{ color: '#F28C38' }}>QR Code</strong> will be auto-generated for this partner upon creation.
+                </p>
+                <button type="submit" className="adm-add-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '4px' }} disabled={addingPartner}>
+                  {addingPartner ? 'Creating...' : <><PlusOutlined /> Add Partner</>}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Partner Created — QR & Referral Code Modal */}
+      {createdPartner && (
+        <div className="adm-modal-overlay" onClick={() => setCreatedPartner(null)}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h4 className="adm-modal-title"><QrcodeOutlined /> Partner Created</h4>
+              <button className="adm-modal-close" onClick={() => setCreatedPartner(null)}>✕</button>
+            </div>
+            <div className="adm-modal-body" style={{ textAlign: 'center' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ color: '#22c55e', fontWeight: 800, fontSize: '14px', marginBottom: '4px' }}>Partner added successfully!</p>
+                <p style={{ color: '#aaa', fontSize: '12px' }}>{createdPartner.name}</p>
+              </div>
+
+              <div style={{ background: '#fff', borderRadius: '16px', display: 'inline-block', padding: '16px', marginBottom: '16px' }}>
+                <img
+                  src={generateQRCodeUrl(`${window.location.origin}/?ref=${createdPartner.referralCode}`, 200)}
+                  alt="Partner QR"
+                  style={{ width: '180px', height: '180px' }}
+                />
+              </div>
+
+              <div style={{ background: 'rgba(242,140,56,0.08)', border: '1px solid rgba(242,140,56,0.2)', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
+                <p style={{ color: '#888', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>REFERRAL CODE</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                  <span style={{ color: '#F28C38', fontSize: '20px', fontWeight: 900, letterSpacing: '2px' }}>{createdPartner.referralCode}</span>
+                  <button
+                    style={{ background: 'none', border: '1px solid #444', borderRadius: '8px', color: '#aaa', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}
+                    onClick={() => { navigator.clipboard.writeText(createdPartner.referralCode); toast.success('Referral code copied!') }}
+                    title="Copy"
+                  >
+                    <CopyOutlined />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(242,140,56,0.08)', border: '1px solid rgba(242,140,56,0.2)', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+                <p style={{ color: '#888', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', marginBottom: '6px' }}>COUPON CODE</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                  <span style={{ color: '#F28C38', fontSize: '20px', fontWeight: 900, letterSpacing: '2px' }}>{createdPartner.code}</span>
+                  <button
+                    style={{ background: 'none', border: '1px solid #444', borderRadius: '8px', color: '#aaa', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}
+                    onClick={() => { navigator.clipboard.writeText(createdPartner.code); toast.success('Coupon code copied!') }}
+                    title="Copy"
+                  >
+                    <CopyOutlined />
+                  </button>
+                </div>
+              </div>
+
+              <p style={{ color: '#666', fontSize: '11px', lineHeight: '1.5' }}>
+                Share this QR & referral code with <strong style={{ color: '#fff' }}>{createdPartner.name}</strong>. When a user registers using this referral, it will be tracked under this partner.
+              </p>
+
+              <button
+                className="adm-add-btn"
+                style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}
+                onClick={() => {
+                  const qrUrl = generateQRCodeUrl(`${window.location.origin}/?ref=${createdPartner.referralCode}`, 600)
+                  window.open(qrUrl, '_blank')
+                }}
+              >
+                <DownloadOutlined /> Download QR
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Desktop Table */}
@@ -171,6 +282,7 @@ const PartnerManagement = () => {
             <tr>
               <th>Name</th>
               <th>Code</th>
+              <th>Referral</th>
               <th>Sales</th>
               <th>Revenue</th>
               <th>Commission %</th>
@@ -184,6 +296,7 @@ const PartnerManagement = () => {
               <tr key={p.key} className={p.status !== 'active' ? 'adm-row-suspended' : ''}>
                 <td className="adm-td-name">{p.name}</td>
                 <td className="adm-td-vehicle">{p.code}</td>
+                <td className="adm-td-id">{p.referralCode || '—'}</td>
                 <td>{p.totalSales || 0}</td>
                 <td>₹{(p.totalRevenue || 0).toLocaleString()}</td>
                 <td>{p.comm || 0}%</td>
@@ -197,6 +310,11 @@ const PartnerManagement = () => {
                     {(p.pendingComm || 0) > 0 && (
                       <button className="adm-btn-sm adm-btn-green" onClick={() => markPaid(p)} title="Mark as Paid">
                         <DollarOutlined />
+                      </button>
+                    )}
+                    {p.referralCode && (
+                      <button className="adm-btn-sm" onClick={() => setCreatedPartner(p)} title="View QR & Referral">
+                        <QrcodeOutlined />
                       </button>
                     )}
                     <button className="adm-btn-sm" onClick={() => viewPartnerCustomers(p)} title="View Customers">👥</button>
