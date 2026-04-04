@@ -4,10 +4,7 @@ import {
   WalletOutlined, UsergroupAddOutlined, KeyOutlined,
   ControlOutlined, SafetyOutlined, SunOutlined,
   MoonOutlined, LogoutOutlined, MenuOutlined,
-<<<<<<< HEAD
   InfoCircleOutlined,
-=======
->>>>>>> main
 } from '@ant-design/icons'
 import AdminLogin from './AdminLogin'
 import AdminDashboard from './AdminDashboard'
@@ -20,10 +17,7 @@ import ControlPanel from './ControlPanel'
 import SecurityPanel from './SecurityPanel'
 import logoImg from '../../assets/icons/Rakshak.jpg'
 import './Admin.css'
-<<<<<<< HEAD
 // import About from './About'
-=======
->>>>>>> main
 
 const BASE_NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: <AppstoreOutlined /> },
@@ -31,10 +25,7 @@ const BASE_NAV = [
   { id: 'users', label: 'User Panel', icon: <TeamOutlined /> },
   { id: 'finance', label: 'Finance Panel', icon: <WalletOutlined /> },
   { id: 'partners', label: 'Partner Panel', icon: <UsergroupAddOutlined /> },
-<<<<<<< HEAD
   // { id: 'about', label: 'About', icon: <InfoCircleOutlined /> },
-=======
->>>>>>> main
 ]
 
 const SUPER_ADMIN_NAV = [
@@ -105,10 +96,7 @@ const AdminLayout = () => {
       case 'access': return <AdminManagement currentAdmin={admin} />
       case 'control': return <ControlPanel />
       case 'security': return <SecurityPanel />
-<<<<<<< HEAD
       // case 'about': return <About />
-=======
->>>>>>> main
       default: return <AdminDashboard />
     }
   }
