@@ -1,0 +1,328 @@
+/* ==========================================
+   SUPPORT DRAWER — Chat UI
+   ========================================== */
+.sd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sd-drawer {
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  height: 100dvh;
+  background: #0c0c0c;
+  display: flex;
+  flex-direction: column;
+  animation: sdSlideIn 0.3s ease-out;
+  border-left: 1px solid rgba(242, 140, 56, 0.1);
+}
+
+@keyframes sdSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Header */
+.sd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: rgba(21, 21, 21, 0.8);
+  border-bottom: 1px solid rgba(242, 140, 56, 0.1);
+  flex-shrink: 0;
+}
+
+.sd-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sd-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(242, 140, 56, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 2px solid rgba(242, 140, 56, 0.3);
+}
+
+.sd-header h3 {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.sd-status {
+  color: #00c853;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sd-online-dot {
+  width: 6px;
+  height: 6px;
+  background: #00c853;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.sd-close {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sd-close:active {
+  color: #F28C38;
+  background: rgba(242, 140, 56, 0.08);
+}
+
+/* Contact Bar */
+.sd-contact-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+}
+
+.sd-contact-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  transition: all 0.2s;
+}
+
+.sd-call {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.sd-wa {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+}
+
+.sd-email {
+  background: rgba(242, 140, 56, 0.1);
+  color: #F28C38;
+  border: 1px solid rgba(242, 140, 56, 0.2);
+}
+
+.sd-contact-btn:active {
+  transform: scale(0.96);
+}
+
+/* Chat Area */
+.sd-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Welcome */
+.sd-welcome {
+  text-align: center;
+  padding: 30px 10px 20px;
+}
+
+.sd-welcome-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.sd-welcome h4 {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.sd-welcome p {
+  color: #888;
+  font-size: 13px;
+}
+
+/* Quick Actions */
+.sd-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sd-quick-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #ccc;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  min-height: 48px;
+  transition: all 0.2s;
+}
+
+.sd-quick-btn:active {
+  border-color: #F28C38;
+  background: rgba(242, 140, 56, 0.06);
+  color: #F28C38;
+}
+
+/* Messages */
+.sd-msg {
+  display: flex;
+}
+
+.sd-msg-user {
+  justify-content: flex-end;
+}
+
+.sd-msg-bot {
+  justify-content: flex-start;
+}
+
+.sd-msg-bubble {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  position: relative;
+}
+
+.sd-msg-user .sd-msg-bubble {
+  background: #F28C38;
+  color: #000;
+  border-bottom-right-radius: 4px;
+}
+
+.sd-msg-bot .sd-msg-bubble {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ddd;
+  border-bottom-left-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sd-msg-bubble p {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.sd-msg-time {
+  font-size: 9px;
+  opacity: 0.6;
+  font-weight: 700;
+}
+
+.sd-msg-user .sd-msg-time {
+  color: #000;
+}
+
+/* Input Bar */
+.sd-input-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(21, 21, 21, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+.sd-input-bar input {
+  flex: 1;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  min-height: 48px;
+  transition: border-color 0.3s;
+}
+
+.sd-input-bar input:focus {
+  border-color: #F28C38;
+}
+
+.sd-input-bar input::placeholder {
+  color: #555;
+}
+
+.sd-send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #F28C38;
+  color: #000;
+  border: none;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.sd-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sd-send-btn:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+/* Mobile full width */
+@media (max-width: 480px) {
+  .sd-drawer {
+    max-width: 100%;
+  }
+}

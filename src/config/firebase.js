@@ -14,6 +14,7 @@ import {
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAs2Gz0ofXnCmePl50-tGHqGTsBvOgj7o0",
@@ -31,8 +32,16 @@ export const db = getDatabase(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
+// FCM Messaging — only init in browser (not SSR)
+let messaging = null;
+try {
+  messaging = getMessaging(app);
+} catch (e) {
+  console.warn("FCM not supported in this environment");
+}
+export { messaging, getToken, onMessage };
+
 // Re-export database utilities
 export { ref, push, set, get, update, query, orderByChild, equalTo, increment, onValue };
 
 export default app;
-

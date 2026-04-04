@@ -1,0 +1,159 @@
+/* My Vehicles Modal */
+.mv-modal {
+  max-width: 460px !important;
+}
+
+.mv-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.mv-icon {
+  font-size: 44px;
+  margin-bottom: 10px;
+}
+
+.mv-header h2 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.mv-header p {
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mv-loading, .mv-empty {
+  text-align: center;
+  color: #888;
+  padding: 40px 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Vehicle List */
+.mv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mv-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mv-card:active {
+  transform: scale(0.98);
+}
+
+.mv-card-active {
+  border-color: rgba(0, 200, 83, 0.3);
+  background: rgba(0, 200, 83, 0.04);
+  cursor: default;
+}
+
+.mv-card:not(.mv-card-active):hover {
+  border-color: #F28C38;
+  background: rgba(242, 140, 56, 0.04);
+}
+
+.mv-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.mv-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mv-card-vnum {
+  color: #F28C38;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.mv-card-id {
+  color: #555;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.mv-active-badge {
+  background: rgba(0, 200, 83, 0.12);
+  color: #00c853;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border: 1px solid rgba(0, 200, 83, 0.25);
+}
+
+.mv-switch-badge {
+  background: rgba(242, 140, 56, 0.1);
+  color: #F28C38;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(242, 140, 56, 0.2);
+}
+
+/* Details row */
+.mv-card-details {
+  display: flex;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mv-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mv-detail-label {
+  color: #555;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mv-detail-value {
+  color: #ddd;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mv-count {
+  text-align: center;
+  color: #444;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .mv-modal { padding: 22px 16px !important; }
+  .mv-card-vnum { font-size: 16px; }
+  .mv-card-details { flex-direction: column; gap: 8px; }
+}

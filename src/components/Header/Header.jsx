@@ -41,6 +41,7 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
 
         <div className="nav-right">
           <button className="btn-login" onClick={onLoginClick}>{t('navAlreadyRegistered')}</button>
+          <button className="btn-admin-login" onClick={onAdminLogin}>ADMIN</button>
           <select className="language-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="en">ENGLISH</option>
             <option value="hi">हिन्दी</option>
