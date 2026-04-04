@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { db, ref, get, set } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
+import PasswordInput from '../ui/PasswordInput'
 import './SmartVaultModal.css'
 
 const SmartVaultModal = ({ open, onClose }) => {
@@ -151,8 +152,7 @@ const SmartVaultModal = ({ open, onClose }) => {
             <form onSubmit={handleSetupPin}>
               <div className="sv-field">
                 <label>CREATE 4-DIGIT PIN</label>
-                <input
-                  type="password"
+                <PasswordInput
                   placeholder="● ● ● ●"
                   maxLength={4}
                   value={pin}
@@ -164,8 +164,7 @@ const SmartVaultModal = ({ open, onClose }) => {
               </div>
               <div className="sv-field">
                 <label>CONFIRM PIN</label>
-                <input
-                  type="password"
+                <PasswordInput
                   placeholder="● ● ● ●"
                   maxLength={4}
                   value={confirmPin}
@@ -207,8 +206,7 @@ const SmartVaultModal = ({ open, onClose }) => {
               </div>
               <div className="sv-field">
                 <label>4-DIGIT PIN</label>
-                <input
-                  type="password"
+                <PasswordInput
                   placeholder="● ● ● ●"
                   maxLength={4}
                   value={pin}

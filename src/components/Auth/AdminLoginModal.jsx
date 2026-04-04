@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { SafetyCertificateOutlined, IdcardOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons'
+import { IdcardOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons'
 import { db, ref, get } from '../../config/firebase'
 import { verifyPassword } from '../../utils/hashPassword'
 import useBodyLock from '../../hooks/useBodyLock'
+import PasswordInput from '../ui/PasswordInput'
+import logoImg from '../../assets/icons/Rakshak.jpg'
 import './LoginModal.css'
 
 const AdminLoginModal = ({ open, onClose }) => {
@@ -84,7 +86,7 @@ const AdminLoginModal = ({ open, onClose }) => {
     <div className="modal-overlay" onClick={handleClose}>
       <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
         <span className="close-btn" onClick={handleClose}>&times;</span>
-        <div className="admin-icon"><SafetyCertificateOutlined /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}><img src={logoImg} alt="Rakshak" style={{ width: '70px', borderRadius: '14px' }} /></div>
         <h2 className="admin-title">Admin <span className="text-orange">Portal</span></h2>
         <p className="admin-subtitle">Secure Administrator Access</p>
 
@@ -106,8 +108,7 @@ const AdminLoginModal = ({ open, onClose }) => {
             <label style={{ color: '#F28C38', letterSpacing: '1px', display: 'block', textAlign: 'left', marginBottom: '6px', fontSize: '11px', fontWeight: 700 }}>
               <LockOutlined /> PASSWORD
             </label>
-            <input
-              type="password"
+            <PasswordInput
               placeholder="ENTER PASSWORD"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError('') }}

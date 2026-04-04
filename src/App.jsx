@@ -6,9 +6,7 @@ import AppRouter from './router/AppRouter'
 import RegistrationModal from './components/Auth/RegistrationModal'
 import PremiumStudioModal from './components/Auth/PremiumStudioModal'
 import SuccessModal from './components/Auth/SuccessModal'
-import LoginModal from './components/Auth/LoginModal'
-import AdminLoginModal from './components/Auth/AdminLoginModal'
-import PartnerLoginModal from './components/Auth/PartnerLoginModal'
+import AuthPortalModal from './components/Auth/AuthPortalModal'
 import SupportTicketModal from './components/Auth/SupportTicketModal'
 import ServiceInquiryModal from './components/Auth/ServiceInquiryModal'
 import BenefitsSlider from './components/Features/BenefitsSlider'
@@ -18,9 +16,7 @@ import './App.css'
 function GlobalModals() {
   const {
     registrationOpen, setRegistrationOpen,
-    loginOpen, setLoginOpen,
-    adminLoginOpen, setAdminLoginOpen,
-    partnerLoginOpen, setPartnerLoginOpen,
+    authModalOpen, authModalRole, closeAuthModal,
     supportTicketOpen, setSupportTicketOpen,
     studioOpen, setStudioOpen,
     successOpen, setSuccessOpen, successData, setSuccessData,
@@ -48,17 +44,10 @@ function GlobalModals() {
         onClose={() => { setSuccessOpen(false); setSuccessData(null) }}
         data={successData}
       />
-      <LoginModal
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-      />
-      <AdminLoginModal
-        open={adminLoginOpen}
-        onClose={() => setAdminLoginOpen(false)}
-      />
-      <PartnerLoginModal
-        open={partnerLoginOpen}
-        onClose={() => setPartnerLoginOpen(false)}
+      <AuthPortalModal
+        open={authModalOpen}
+        onClose={closeAuthModal}
+        defaultRole={authModalRole}
       />
       <SupportTicketModal
         open={supportTicketOpen}

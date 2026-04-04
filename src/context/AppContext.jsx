@@ -29,9 +29,8 @@ export const AppProvider = ({ children }) => {
 
   // Modal states
   const [registrationOpen, setRegistrationOpen] = useState(false)
-  const [loginOpen, setLoginOpen] = useState(false)
-  const [adminLoginOpen, setAdminLoginOpen] = useState(false)
-  const [partnerLoginOpen, setPartnerLoginOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalRole, setAuthModalRole] = useState('user')
   const [supportTicketOpen, setSupportTicketOpen] = useState(false)
   const [studioOpen, setStudioOpen] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
@@ -49,7 +48,15 @@ export const AppProvider = ({ children }) => {
 
   // Handlers
   const handleRegisterClick = useCallback(() => setRegistrationOpen(true), [])
-  const handleLoginClick = useCallback(() => setLoginOpen(true), [])
+  const openAuthModal = useCallback((role = 'user') => {
+    setAuthModalRole(role)
+    setAuthModalOpen(true)
+  }, [])
+  const closeAuthModal = useCallback(() => {
+    setAuthModalOpen(false)
+    setAuthModalRole('user')
+  }, [])
+  const handleLoginClick = useCallback(() => openAuthModal('user'), [openAuthModal])
 
   const handleRegistrationSuccess = useCallback((data) => {
     setSuccessData(data)
@@ -81,9 +88,8 @@ export const AppProvider = ({ children }) => {
 
     // Modal states
     registrationOpen, setRegistrationOpen,
-    loginOpen, setLoginOpen,
-    adminLoginOpen, setAdminLoginOpen,
-    partnerLoginOpen, setPartnerLoginOpen,
+    authModalOpen, setAuthModalOpen,
+    authModalRole, setAuthModalRole,
     supportTicketOpen, setSupportTicketOpen,
     studioOpen, setStudioOpen,
     successOpen, setSuccessOpen,
@@ -97,6 +103,8 @@ export const AppProvider = ({ children }) => {
     // Handlers
     handleRegisterClick,
     handleLoginClick,
+    openAuthModal,
+    closeAuthModal,
     handleRegistrationSuccess,
     handleOpenStudio,
     handleServiceClick,

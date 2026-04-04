@@ -6,6 +6,7 @@ import {
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, onValue } from '../../config/firebase'
+import { logAdminAction, ACTIONS } from '../../utils/auditLog'
 
 const SupportInbox = () => {
   const [threads, setThreads] = useState([])
@@ -76,6 +77,7 @@ const SupportInbox = () => {
         timestamp: new Date().toISOString(),
       })
       setReply('')
+      await logAdminAction(ACTIONS.SUPPORT_REPLY, selectedThread.customerKey, selectedThread.name, { message: reply.trim().slice(0, 100) })
       toast.success('Reply sent')
     } catch {
       toast.error('Failed to send')

@@ -14,9 +14,9 @@ import Footer from '../components/Footer/Footer'
 const HomePage = () => {
   const {
     language, setLanguage,
-    handleRegisterClick, handleLoginClick,
+    handleRegisterClick, openAuthModal,
     handleBenefitSlider, handleServiceClick,
-    setPartnerLoginOpen, setSupportTicketOpen, setAdminLoginOpen,
+    setSupportTicketOpen,
   } = useAppContext()
 
   return (
@@ -28,10 +28,8 @@ const HomePage = () => {
       <Header
         language={language}
         setLanguage={setLanguage}
-        onLoginClick={handleLoginClick}
-        onPartnerLogin={() => setPartnerLoginOpen(true)}
+        onLoginClick={openAuthModal}
         onSupportTicket={() => setSupportTicketOpen(true)}
-        onAdminLogin={() => setAdminLoginOpen(true)}
       />
       <main>
         <Hero onRegisterClick={handleRegisterClick} />
@@ -39,11 +37,11 @@ const HomePage = () => {
         <ProcessFlow />
         <WhyIndia onCardClick={handleBenefitSlider} />
         <Reviews />
-        <PremiumTools onLoginClick={handleLoginClick} />
+        <PremiumTools onLoginClick={() => openAuthModal('user')} />
         <Services onServiceClick={handleServiceClick} />
         <Contact />
       </main>
-      <Footer onAdminLogin={() => setAdminLoginOpen(true)} />
+      <Footer onAdminLogin={() => openAuthModal('admin')} />
     </>
   )
 }

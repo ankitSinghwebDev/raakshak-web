@@ -8,6 +8,7 @@ import {
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { hashPassword } from '../../utils/hashPassword'
+import PasswordInput from '../ui/PasswordInput'
 import { ListSkeleton } from './AdminSkeleton'
 
 const ROLE_HIERARCHY = { 'Super Admin': 4, 'Admin': 3, 'Support': 2, 'Viewer': 1 }
@@ -16,7 +17,7 @@ const AdminManagement = ({ currentAdmin }) => {
   const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
-  const [newAdmin, setNewAdmin] = useState({ name: '', empId: '', password: '', role: 'Admin' })
+  const [newAdmin, setNewAdmin] = useState({ name: '', empId: '', email: '', password: '', role: 'Admin' })
 
   const isSuperAdmin = currentAdmin?.role === 'Super Admin'
 
@@ -80,6 +81,7 @@ const AdminManagement = ({ currentAdmin }) => {
       await set(adminRef, {
         name: newAdmin.name.trim(),
         empId: newAdmin.empId.trim(),
+        email: newAdmin.email.trim().toLowerCase(),
         password: hashedPwd,
         role: newAdmin.role,
         status: 'active',
@@ -88,7 +90,7 @@ const AdminManagement = ({ currentAdmin }) => {
       })
       toast.success(`Admin "${newAdmin.name}" created!`)
       setShowAdd(false)
-      setNewAdmin({ name: '', empId: '', password: '', role: 'Admin' })
+      setNewAdmin({ name: '', empId: '', email: '', password: '', role: 'Admin' })
       fetchAdmins()
     } catch {
       toast.error('Failed to create admin')
@@ -202,11 +204,21 @@ const AdminManagement = ({ currentAdmin }) => {
                 </div>
               </div>
               <div className="adm-form-field">
-                <label className="adm-form-label">Password</label>
+                <label className="adm-form-label">Email (for password recovery)</label>
                 <input
                   className="adm-form-input"
+                  type="email"
+                  placeholder="admin@company.com"
+                  value={newAdmin.email}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="adm-form-field">
+                <label className="adm-form-label">Password</label>
+                <PasswordInput
+                  className="adm-form-input"
                   placeholder="Min 6 characters"
-                  type="password"
                   value={newAdmin.password}
                   onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
                   required

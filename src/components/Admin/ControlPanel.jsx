@@ -6,6 +6,7 @@ import {
   SaveOutlined, SettingOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { db, ref, get, set } from '../../config/firebase'
+import { logAdminAction, ACTIONS } from '../../utils/auditLog'
 import { SettingsSkeleton } from './AdminSkeleton'
 
 const { Text } = Typography
@@ -43,6 +44,7 @@ const ControlPanel = () => {
     setSaving(true)
     try {
       await set(ref(db, 'config'), config)
+      await logAdminAction(ACTIONS.CONFIG_UPDATED, 'config', 'System Config', config)
       toast.success('Configuration saved!')
     } catch {
       toast.error('Failed to save')
@@ -69,53 +71,73 @@ const ControlPanel = () => {
         {/* System Controls */}
         <Col xs={24} md={12}>
           <Card title={<><ControlOutlined /> System Controls</>} size="small" className="adm-chart-card">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+            <div className="adm-control-list">
+              <div className="adm-control-row">
+                <div className="adm-control-copy">
                   <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Maintenance Mode</Text>
                   <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Disables all user access</Text>
                 </div>
-                <Switch
-                  checked={config.maintenanceMode}
-                  onChange={(v) => updateConfig('maintenanceMode', v)}
-                  checkedChildren="ON" unCheckedChildren="OFF"
-                />
+                <div className="adm-control-toggle-wrap">
+                  <span className={`adm-control-state ${config.maintenanceMode ? 'is-on' : 'is-off'}`}>
+                    {config.maintenanceMode ? 'ON' : 'OFF'}
+                  </span>
+                  <Switch
+                    className="adm-control-switch"
+                    checked={config.maintenanceMode}
+                    onChange={(v) => updateConfig('maintenanceMode', v)}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+              <div className="adm-control-row">
+                <div className="adm-control-copy">
                   <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Registration</Text>
                   <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Allow new customer signups</Text>
                 </div>
-                <Switch
-                  checked={config.registrationEnabled}
-                  onChange={(v) => updateConfig('registrationEnabled', v)}
-                  checkedChildren="ON" unCheckedChildren="OFF"
-                />
+                <div className="adm-control-toggle-wrap">
+                  <span className={`adm-control-state ${config.registrationEnabled ? 'is-on' : 'is-off'}`}>
+                    {config.registrationEnabled ? 'ON' : 'OFF'}
+                  </span>
+                  <Switch
+                    className="adm-control-switch"
+                    checked={config.registrationEnabled}
+                    onChange={(v) => updateConfig('registrationEnabled', v)}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+              <div className="adm-control-row">
+                <div className="adm-control-copy">
                   <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>QR Scanner</Text>
                   <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>Allow public scan page</Text>
                 </div>
-                <Switch
-                  checked={config.scannerEnabled}
-                  onChange={(v) => updateConfig('scannerEnabled', v)}
-                  checkedChildren="ON" unCheckedChildren="OFF"
-                />
+                <div className="adm-control-toggle-wrap">
+                  <span className={`adm-control-state ${config.scannerEnabled ? 'is-on' : 'is-off'}`}>
+                    {config.scannerEnabled ? 'ON' : 'OFF'}
+                  </span>
+                  <Switch
+                    className="adm-control-switch"
+                    checked={config.scannerEnabled}
+                    onChange={(v) => updateConfig('scannerEnabled', v)}
+                  />
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+              <div className="adm-control-row">
+                <div className="adm-control-copy">
                   <Text strong style={{ color: 'var(--text-primary)', display: 'block' }}>Push Notifications</Text>
                   <Text style={{ color: 'var(--text-dim)', fontSize: 12 }}>FCM notifications to owners</Text>
                 </div>
-                <Switch
-                  checked={config.pushNotificationsEnabled}
-                  onChange={(v) => updateConfig('pushNotificationsEnabled', v)}
-                  checkedChildren="ON" unCheckedChildren="OFF"
-                />
+                <div className="adm-control-toggle-wrap">
+                  <span className={`adm-control-state ${config.pushNotificationsEnabled ? 'is-on' : 'is-off'}`}>
+                    {config.pushNotificationsEnabled ? 'ON' : 'OFF'}
+                  </span>
+                  <Switch
+                    className="adm-control-switch"
+                    checked={config.pushNotificationsEnabled}
+                    onChange={(v) => updateConfig('pushNotificationsEnabled', v)}
+                  />
+                </div>
               </div>
             </div>
           </Card>

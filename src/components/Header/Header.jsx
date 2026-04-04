@@ -6,7 +6,7 @@ import useTranslation from '../../i18n/useTranslation'
 import logoImg from '../../assets/icons/Rakshak.jpg'
 import './Header.css'
 
-const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupportTicket, onAdminLogin }) => {
+const Header = ({ language, setLanguage, onLoginClick, onSupportTicket }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   useBodyLock(mobileMenuOpen)
   const [partnerDropdownOpen, setPartnerDropdownOpen] = useState(false)
@@ -40,8 +40,7 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
         </nav>
 
         <div className="nav-right">
-          <button className="btn-login" onClick={onLoginClick}>{t('navAlreadyRegistered')}</button>
-          <button className="btn-admin-login" onClick={onAdminLogin}>ADMIN</button>
+          <button className="btn-login" onClick={() => onLoginClick('user')}>{t('navLoginPortal')}</button>
           <select className="language-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="en">ENGLISH</option>
             <option value="hi">हिन्दी</option>
@@ -50,7 +49,7 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
             <button className="partner-zone-btn">{t('navPartnerZone')}</button>
             {partnerDropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={onPartnerLogin}>{t('navPartnerLogin')}</button>
+                <button onClick={() => onLoginClick('partner')}>{t('navPartnerLogin')}</button>
                 <button onClick={onSupportTicket}>{t('navSupportTicket')}</button>
               </div>
             )}
@@ -72,10 +71,10 @@ const Header = ({ language, setLanguage, onLoginClick, onPartnerLogin, onSupport
             <Link to="/about" onClick={handleNavClick}>{t('navAboutUs')}</Link>
             <a href="#contact" onClick={handleNavClick}>{t('navContact')}</a>
             <div className="mobile-divider" />
-            <button className="mobile-link highlight-link" onClick={() => { closeMenu(); onLoginClick() }}>{t('navAlreadyRegistered')}</button>
-            <button className="mobile-link" onClick={() => { closeMenu(); onPartnerLogin() }}>{t('navPartnerLogin')}</button>
+            <button className="mobile-link highlight-link" onClick={() => { closeMenu(); onLoginClick('user') }}>{t('navLoginPortal')}</button>
+            <button className="mobile-link" onClick={() => { closeMenu(); onLoginClick('partner') }}>{t('navPartnerLogin')}</button>
             <button className="mobile-link" onClick={() => { closeMenu(); onSupportTicket() }}>{t('navSupportTicket')}</button>
-            <button className="mobile-link" onClick={() => { closeMenu(); onAdminLogin() }}>{t('navAdminLogin')}</button>
+            <button className="mobile-link" onClick={() => { closeMenu(); onLoginClick('admin') }}>{t('navAdminLogin')}</button>
             <div className="mobile-divider" />
             <select className="mobile-lang-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
               <option value="en">🌐 ENGLISH</option>
