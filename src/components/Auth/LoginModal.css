@@ -110,6 +110,185 @@
   color: #333;
 }
 
+/* Unified Auth Portal */
+.auth-portal-modal {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  padding: max(56px, calc(env(safe-area-inset-top) + 44px)) 24px max(40px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at top, rgba(242, 140, 56, 0.16), transparent 38%),
+    #0c0c0c;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-button {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.auth-portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.auth-portal-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.auth-portal-kicker {
+  margin: 0 0 4px;
+  color: #F28C38;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.auth-portal-title {
+  margin: 0;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.auth-portal-subtitle {
+  margin: 0 0 24px;
+  color: #9b9b9b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.auth-role-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.auth-role-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 82px;
+  padding: 14px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  color: #9a9a9a;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-role-tab span[role='img'],
+.auth-role-tab .anticon {
+  font-size: 18px;
+}
+
+.auth-role-tab-active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(242, 140, 56, 0.2), rgba(242, 140, 56, 0.08));
+  border-color: rgba(242, 140, 56, 0.5);
+  box-shadow: 0 12px 30px rgba(242, 140, 56, 0.12);
+}
+
+.auth-panel {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+}
+
+.auth-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.auth-panel-header h3 {
+  margin: 0 0 4px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.auth-panel-header p {
+  margin: 0;
+  color: #7d7d7d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.auth-panel-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(242, 140, 56, 0.12);
+  color: #F28C38;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.auth-field {
+  margin-bottom: 14px;
+}
+
+.auth-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #F28C38;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: #F28C38;
+  font-size: 15px;
+  font-weight: 800;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.auth-input:focus {
+  border-color: #F28C38;
+  box-shadow: 0 0 0 3px rgba(242, 140, 56, 0.1);
+}
+
+.auth-input::placeholder {
+  color: #4f4f4f;
+  letter-spacing: 0.8px;
+}
+
+.auth-input-emphasis {
+  text-align: center;
+  letter-spacing: 3px;
+  font-size: 20px;
+}
+
 /* ==========================================
    Admin Modal
    ========================================== */
@@ -286,6 +465,7 @@
    DESKTOP (769px+)
    ========================================== */
 @media (min-width: 769px) {
+  .auth-portal-modal,
   .login-modal-content,
   .admin-modal-content,
   .partner-modal-content,
@@ -298,9 +478,20 @@
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   }
 
+  .auth-portal-modal {
+    max-width: 460px;
+    min-height: auto;
+    padding: 56px 30px 36px;
+  }
+
   .admin-modal-content {
     border: 2px solid #F28C38;
     box-shadow: 0 0 40px rgba(242, 140, 56, 0.3);
+  }
+
+  .auth-role-tab:hover {
+    border-color: rgba(242, 140, 56, 0.35);
+    transform: translateY(-2px);
   }
 
   .btn-login-submit:hover:not(:disabled),

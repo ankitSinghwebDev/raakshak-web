@@ -22,7 +22,9 @@ const PasswordInput = ({ value, onChange, placeholder, className, ...props }) =>
         tabIndex={-1}
         aria-label={visible ? 'Hide password' : 'Show password'}
       >
-        {visible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        <span className="pwd-icon-slot">
+          {visible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        </span>
       </button>
     </div>
   )

@@ -369,33 +369,105 @@
   padding: 16px !important;
 }
 
+.adm-control-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.adm-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.adm-control-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.adm-control-toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.adm-control-state {
+  min-width: 38px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  text-align: center;
+  border: 1px solid var(--border-input);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+}
+
+.adm-control-state.is-on {
+  background: rgba(242, 140, 56, 0.12);
+  border-color: rgba(242, 140, 56, 0.28);
+  color: var(--accent);
+}
+
+.adm-control-state.is-off {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-input);
+  color: var(--text-secondary);
+}
+
 /* Ant Design Switch — Dark Theme Fix */
-.adm .ant-switch {
-  min-width: 52px;
-  height: 28px;
+.adm .ant-switch,
+.adm .adm-control-switch.ant-switch {
+  min-width: 58px;
+  width: 58px;
+  height: 32px;
   background: #333;
   border: none;
+  border-radius: 999px;
+  padding: 0;
 }
 .adm .ant-switch-checked {
   background: #F28C38 !important;
 }
-.adm .ant-switch-handle {
-  width: 22px;
-  height: 22px;
-  top: 3px;
-  inset-inline-start: 3px;
+.adm .ant-switch-handle,
+.adm .adm-control-switch .ant-switch-handle {
+  width: 24px;
+  height: 24px;
+  top: 4px;
+  inset-inline-start: 4px;
 }
-.adm .ant-switch-handle::before {
+.adm .ant-switch-handle::before,
+.adm .adm-control-switch .ant-switch-handle::before {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 .adm .ant-switch-checked .ant-switch-handle {
-  inset-inline-start: calc(100% - 25px);
+  inset-inline-start: calc(100% - 28px);
 }
 .adm .ant-switch-inner {
   font-size: 11px;
   font-weight: 800;
+}
+
+.adm .adm-control-switch .ant-switch-inner {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .adm-control-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .adm-control-toggle-wrap {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 /* Ant Design InputNumber — Dark Theme Fix */
@@ -1436,4 +1508,3 @@
   border-color: #d1d5db;
   color: #666;
 }
-

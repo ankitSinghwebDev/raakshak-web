@@ -98,8 +98,13 @@ const StatCard = ({ target, label, suffix, display }) => {
 }
 
 const AboutUs = () => {
-  const { handleRegisterClick, language, setLanguage, handleLoginClick,
-    setPartnerLoginOpen, setSupportTicketOpen, setAdminLoginOpen } = useAppContext()
+  const {
+    handleRegisterClick,
+    language,
+    setLanguage,
+    openAuthModal,
+    setSupportTicketOpen,
+  } = useAppContext()
   const [letterOpen, setLetterOpen] = useState(false)
 
   useEffect(() => {
@@ -116,10 +121,8 @@ const AboutUs = () => {
       <Header
         language={language}
         setLanguage={setLanguage}
-        onLoginClick={handleLoginClick}
-        onPartnerLogin={() => setPartnerLoginOpen(true)}
+        onLoginClick={openAuthModal}
         onSupportTicket={() => setSupportTicketOpen(true)}
-        onAdminLogin={() => setAdminLoginOpen(true)}
       />
 
       {/* Hero */}

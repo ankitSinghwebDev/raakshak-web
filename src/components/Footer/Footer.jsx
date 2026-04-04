@@ -11,7 +11,7 @@ const Footer = ({ onAdminLogin }) => {
         <div className="footer-content">
           <p className="footer-text">
             &copy; {currentYear} {t('footerRights')}
-            <span onClick={onAdminLogin} style={{ cursor: 'default', opacity: 0.05, marginLeft: '4px' }}>.</span>
+            <span onClick={onAdminLogin} style={{ cursor: 'pointer', opacity: 0.05, marginLeft: '4px' }}>.</span>
           </p>
         </div>
       </div>

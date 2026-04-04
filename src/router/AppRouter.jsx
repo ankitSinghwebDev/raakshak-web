@@ -7,6 +7,7 @@ import UserDashboard from '../components/Dashboard/UserDashboard'
 import ScannerPage from '../components/Scanner/ScannerPage'
 import AdminLayout from '../components/Admin/AdminLayout'
 import './PageTransition.css'
+import About from '../components/Admin/About'
 
 const AnimatedRoutes = () => {
   const location = useLocation()
@@ -35,6 +36,8 @@ const AnimatedRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/admin" element={<AdminLayout />} />
+                <Route path="/admin/about" element={<About />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
