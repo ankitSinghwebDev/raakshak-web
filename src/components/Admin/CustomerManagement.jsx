@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
 import {
-  SearchOutlined, DownloadOutlined, EyeOutlined, CloseOutlined,
-  CheckCircleOutlined, StopOutlined, LoadingOutlined,
+  DownloadOutlined, EyeOutlined, CloseOutlined,
+  CheckCircleOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, update } from '../../config/firebase'
+import { ListSkeleton } from './AdminSkeleton'
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState([])
@@ -98,7 +99,7 @@ const CustomerManagement = () => {
     }
   }
 
-  if (loading) return <div className="adm-loading"><LoadingOutlined /> Loading customers...</div>
+  if (loading) return <ListSkeleton />
 
   return (
     <div>

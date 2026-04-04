@@ -4,10 +4,10 @@ import * as XLSX from 'xlsx'
 import {
   PlusOutlined, CloseOutlined, DownloadOutlined,
   CheckCircleOutlined, StopOutlined, DollarOutlined,
-  LoadingOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
+import { ListSkeleton } from './AdminSkeleton'
 
 const PartnerManagement = () => {
   const [partners, setPartners] = useState([])
@@ -105,7 +105,7 @@ const PartnerManagement = () => {
     }
   }
 
-  if (loading) return <div className="adm-loading"><LoadingOutlined /> Loading partners...</div>
+  if (loading) return <ListSkeleton />
 
   return (
     <div>

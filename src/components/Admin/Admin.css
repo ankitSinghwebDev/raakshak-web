@@ -152,8 +152,8 @@
 .adm {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   background: var(--bg-primary);
   color: var(--text-primary);
   overflow: hidden;
@@ -169,9 +169,24 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
+  overflow: hidden;
+}
+
+/* ===== LOGO ===== */
+.adm-sidebar-logo {
+  width: 40px; height: 40px; border-radius: 10px; object-fit: cover;
+  border: 1px solid var(--border-accent);
+}
+.adm-topbar-logo {
+  width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
+}
+.adm-mobile-show { display: block; }
+
+@media (min-width: 769px) {
+  .adm-mobile-show { display: none; }
 }
 
 /* ===== TOPBAR ===== */
@@ -228,9 +243,19 @@
 
 /* ===== CONTENT AREA ===== */
 .adm-content {
-  flex: 1; padding: 16px 14px; padding-bottom: 80px;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1;
+  padding: 16px 14px;
+  padding-bottom: 80px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-input) transparent;
 }
+.adm-content::-webkit-scrollbar { width: 6px; }
+.adm-content::-webkit-scrollbar-track { background: transparent; }
+.adm-content::-webkit-scrollbar-thumb { background: var(--border-input); border-radius: 3px; }
+.adm-content::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 .adm-loading {
   text-align: center; color: var(--text-muted);
@@ -259,6 +284,149 @@
 .adm-bottom-active { color: var(--accent) !important; }
 .adm-bottom-icon { font-size: 20px; line-height: 1; }
 .adm-bottom-label { font-size: 9px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
+
+/* ===== DASHBOARD ===== */
+.adm-dashboard .ant-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-subtle) !important;
+  border-radius: 14px !important;
+  color: var(--text-primary) !important;
+}
+.adm-dashboard .ant-card-head {
+  border-bottom-color: var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+}
+.adm-dashboard .ant-card-head-title {
+  color: var(--text-primary) !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+}
+.adm-dashboard .ant-card-body {
+  padding: 16px !important;
+}
+.adm-dashboard .ant-statistic-title {
+  color: var(--text-dim) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+.adm-dashboard .ant-statistic-content {
+  color: var(--text-primary) !important;
+  font-size: 22px !important;
+}
+.adm-dashboard .ant-statistic-content-prefix {
+  margin-right: 4px !important;
+}
+.adm-dashboard .ant-table {
+  background: transparent !important;
+  color: var(--text-table) !important;
+}
+.adm-dashboard .ant-table-thead > tr > th {
+  background: var(--table-header-bg) !important;
+  color: var(--text-muted) !important;
+  border-bottom-color: var(--border-subtle) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+.adm-dashboard .ant-table-tbody > tr > td {
+  border-bottom-color: var(--border-subtle) !important;
+  color: var(--text-table) !important;
+  font-size: 13px !important;
+}
+.adm-dashboard .ant-table-tbody > tr:hover > td {
+  background: var(--bg-hover) !important;
+}
+.adm-dashboard .ant-empty-description {
+  color: var(--text-dim) !important;
+}
+.adm-dashboard .ant-divider {
+  border-color: var(--border-subtle) !important;
+}
+.adm-dashboard .ant-progress-bg {
+  border-radius: 4px !important;
+}
+.adm-dashboard .ant-progress-inner {
+  background: var(--bg-input) !important;
+  border-radius: 4px !important;
+}
+
+/* KPI Card */
+.adm-kpi-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.adm-kpi-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Chart Card */
+.adm-chart-card {
+  height: 100%;
+}
+
+/* Bar Chart */
+.adm-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  height: 160px;
+  padding-top: 20px;
+}
+.adm-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.adm-bar {
+  width: 100%;
+  max-width: 40px;
+  min-height: 4px;
+  background: linear-gradient(180deg, #d97706, #f59e0b);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+}
+.adm-bar-blue {
+  background: linear-gradient(180deg, #2563eb, #60a5fa);
+}
+.adm-bar-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.adm-bar-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .adm-bar-chart { height: 120px; }
+  .adm-bar-value { font-size: 9px; }
+  .adm-bar-label { font-size: 9px; }
+  .adm-dashboard .ant-statistic-content { font-size: 18px !important; }
+  .adm-dashboard .ant-card-body { padding: 12px !important; }
+}
+
+/* Light theme card shadows */
+.adm.adm-light .adm-kpi-card,
+.adm.adm-light .adm-chart-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+.adm.adm-light .adm-kpi-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
 
 /* ===== EXPORT BUTTON ===== */
 .adm-export-bar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
@@ -768,6 +936,69 @@
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skeletonFade { from { opacity: 0.4; } to { opacity: 1; } }
+
+/* Page content fade-in */
+.adm-content > * {
+  animation: fadeInUp 0.35s ease-out;
+}
+
+/* Dashboard cards staggered animation */
+.adm-dashboard .ant-card {
+  animation: fadeInUp 0.4s ease-out both;
+}
+.adm-dashboard .ant-row > .ant-col:nth-child(1) .ant-card { animation-delay: 0.03s; }
+.adm-dashboard .ant-row > .ant-col:nth-child(2) .ant-card { animation-delay: 0.06s; }
+.adm-dashboard .ant-row > .ant-col:nth-child(3) .ant-card { animation-delay: 0.09s; }
+.adm-dashboard .ant-row > .ant-col:nth-child(4) .ant-card { animation-delay: 0.12s; }
+.adm-dashboard .ant-row > .ant-col:nth-child(5) .ant-card { animation-delay: 0.15s; }
+.adm-dashboard .ant-row > .ant-col:nth-child(6) .ant-card { animation-delay: 0.18s; }
+
+/* Card list items staggered */
+.adm-card-list .adm-card {
+  animation: fadeInUp 0.3s ease-out both;
+}
+.adm-card-list .adm-card:nth-child(1) { animation-delay: 0.02s; }
+.adm-card-list .adm-card:nth-child(2) { animation-delay: 0.04s; }
+.adm-card-list .adm-card:nth-child(3) { animation-delay: 0.06s; }
+.adm-card-list .adm-card:nth-child(4) { animation-delay: 0.08s; }
+.adm-card-list .adm-card:nth-child(5) { animation-delay: 0.10s; }
+
+/* Skeleton fade-in */
+.adm-skeleton-fade {
+  animation: skeletonFade 0.5s ease-in;
+}
+
+/* Antd Skeleton dark theme fix */
+.adm .ant-skeleton-content .ant-skeleton-title,
+.adm .ant-skeleton-content .ant-skeleton-paragraph > li {
+  background: var(--bg-input) !important;
+}
+.adm .ant-skeleton-button,
+.adm .ant-skeleton-input {
+  background: var(--bg-input) !important;
+}
+
+/* KPI card hover lift + active state */
+.adm-kpi-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+}
+.adm-kpi-card:hover {
+  transform: translateY(-3px);
+}
+.adm-kpi-active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-bg) !important;
+}
+
+/* Bar chart bar animation */
+.adm-bar {
+  animation: barGrow 0.6s ease-out both;
+}
+@keyframes barGrow {
+  from { height: 0 !important; }
+}
 
 /* ===== DESKTOP (769px+) ===== */
 @media (min-width: 769px) {
@@ -788,6 +1019,9 @@
   .adm-sidebar-header {
     padding: 24px 20px 16px;
     border-bottom: 1px solid var(--border-accent);
+  }
+  .adm-sidebar-header {
+    display: flex; align-items: center; gap: 12px;
   }
   .adm-sidebar-header h2 { color: var(--accent); font-size: 18px; font-weight: 900; letter-spacing: 2px; margin-bottom: 2px; }
   .adm-sidebar-header p { color: var(--text-dim); font-size: 10px; font-weight: 700; letter-spacing: 1px; }

@@ -1,31 +1,38 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  DashboardOutlined, TeamOutlined, ScanOutlined,
-  MessageOutlined, UsergroupAddOutlined, SunOutlined,
-  MoonOutlined, LogoutOutlined, SafetyCertificateOutlined,
-  SettingOutlined,
+  AppstoreOutlined, LineChartOutlined, TeamOutlined,
+  WalletOutlined, UsergroupAddOutlined, KeyOutlined,
+  ControlOutlined, SafetyOutlined, SunOutlined,
+  MoonOutlined, LogoutOutlined, MenuOutlined,
 } from '@ant-design/icons'
 import AdminLogin from './AdminLogin'
 import AdminDashboard from './AdminDashboard'
+import SalesPanel from './SalesPanel'
 import CustomerManagement from './CustomerManagement'
-import SupportInbox from './SupportInbox'
-import ScanLogs from './ScanLogs'
+import FinancePanel from './FinancePanel'
 import PartnerManagement from './PartnerManagement'
 import AdminManagement from './AdminManagement'
+import ControlPanel from './ControlPanel'
+import SecurityPanel from './SecurityPanel'
+import logoImg from '../../assets/icons/Rakshak.jpg'
 import './Admin.css'
 
 const BASE_NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: <DashboardOutlined /> },
-  { id: 'customers', label: 'Customers', icon: <TeamOutlined /> },
-  { id: 'scans', label: 'Scans', icon: <ScanOutlined /> },
-  { id: 'support', label: 'Support', icon: <MessageOutlined /> },
-  { id: 'partners', label: 'Partners', icon: <UsergroupAddOutlined /> },
+  { id: 'dashboard', label: 'Dashboard', icon: <AppstoreOutlined /> },
+  { id: 'sales', label: 'Sales Panel', icon: <LineChartOutlined /> },
+  { id: 'users', label: 'User Panel', icon: <TeamOutlined /> },
+  { id: 'finance', label: 'Finance Panel', icon: <WalletOutlined /> },
+  { id: 'partners', label: 'Partner Panel', icon: <UsergroupAddOutlined /> },
 ]
 
 const SUPER_ADMIN_NAV = [
-  { id: 'admins', label: 'Admins', icon: <SettingOutlined />, superOnly: true },
+  { id: 'access', label: 'Access Panel', icon: <KeyOutlined />, superOnly: true },
+  { id: 'control', label: 'Control Panel', icon: <ControlOutlined />, superOnly: true },
+  { id: 'security', label: 'Security Panel', icon: <SafetyOutlined />, superOnly: true },
 ]
+
+// Mobile bottom nav — show only first 5 items, rest in "More" or sidebar
+const MOBILE_NAV_LIMIT = 5
 
 const AdminLayout = () => {
   const [admin, setAdmin] = useState(() => {
@@ -35,7 +42,6 @@ const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('rakshak_admin_theme') || 'dark')
-  const navigate = useNavigate()
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -48,7 +54,6 @@ const AdminLayout = () => {
     setAdmin(null)
   }
 
-  // Auto-logout after 15 minutes inactivity
   useEffect(() => {
     if (!admin) return
     let timeout
@@ -75,26 +80,33 @@ const AdminLayout = () => {
 
   const isSuperAdmin = admin.role === 'Super Admin'
   const NAV_ITEMS = isSuperAdmin ? [...BASE_NAV, ...SUPER_ADMIN_NAV] : BASE_NAV
+  const MOBILE_ITEMS = NAV_ITEMS.slice(0, MOBILE_NAV_LIMIT)
+  const hasMore = NAV_ITEMS.length > MOBILE_NAV_LIMIT
 
   const renderPage = () => {
     switch (activeTab) {
       case 'dashboard': return <AdminDashboard />
-      case 'customers': return <CustomerManagement />
-      case 'scans': return <ScanLogs />
-      case 'support': return <SupportInbox />
+      case 'sales': return <SalesPanel />
+      case 'users': return <CustomerManagement />
+      case 'finance': return <FinancePanel />
       case 'partners': return <PartnerManagement />
-      case 'admins': return <AdminManagement currentAdmin={admin} />
+      case 'access': return <AdminManagement currentAdmin={admin} />
+      case 'control': return <ControlPanel />
+      case 'security': return <SecurityPanel />
       default: return <AdminDashboard />
     }
   }
 
   return (
     <div className={`adm ${theme === 'light' ? 'adm-light' : ''}`}>
-      {/* Sidebar — desktop only */}
+      {/* ─── Sidebar ─── */}
       <aside className={`adm-sidebar ${sidebarOpen ? 'adm-sidebar-open' : ''}`}>
         <div className="adm-sidebar-header">
-          <h2><SafetyCertificateOutlined /> RAKSHAK</h2>
-          <p>Admin Panel</p>
+          <img src={logoImg} alt="Rakshak" className="adm-sidebar-logo" />
+          <div>
+            <h2>RAKSHAK</h2>
+            <p>Admin Panel</p>
+          </div>
         </div>
 
         <nav className="adm-nav">
@@ -125,15 +137,15 @@ const AdminLayout = () => {
       {/* Mobile overlay */}
       {sidebarOpen && <div className="adm-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main Content */}
+      {/* ─── Main ─── */}
       <main className="adm-main">
         <header className="adm-topbar">
           <div className="adm-topbar-left">
-            <span className="adm-topbar-brand"><SafetyCertificateOutlined /></span>
+            <img src={logoImg} alt="Rakshak" className="adm-topbar-logo adm-mobile-show" />
             <h3 className="adm-page-title">{NAV_ITEMS.find(n => n.id === activeTab)?.label}</h3>
           </div>
           <div className="adm-topbar-right">
-            <button className="adm-theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}>
+            <button className="adm-theme-toggle" onClick={toggleTheme}>
               {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
             </button>
             <span className="adm-admin-badge">{admin.name?.split(' ')[0] || 'Admin'}</span>
@@ -145,18 +157,27 @@ const AdminLayout = () => {
           {renderPage()}
         </div>
 
-        {/* Bottom Tab Bar — mobile only */}
+        {/* ─── Bottom Nav (mobile) ─── */}
         <nav className="adm-bottom-nav">
-          {NAV_ITEMS.map((item) => (
+          {MOBILE_ITEMS.map((item) => (
             <button
               key={item.id}
               className={`adm-bottom-tab ${activeTab === item.id ? 'adm-bottom-active' : ''}`}
               onClick={() => setActiveTab(item.id)}
             >
               <span className="adm-bottom-icon">{item.icon}</span>
-              <span className="adm-bottom-label">{item.label}</span>
+              <span className="adm-bottom-label">{item.label.replace(' Panel', '')}</span>
             </button>
           ))}
+          {hasMore && (
+            <button
+              className={`adm-bottom-tab ${!MOBILE_ITEMS.find(m => m.id === activeTab) ? 'adm-bottom-active' : ''}`}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="adm-bottom-icon"><MenuOutlined /></span>
+              <span className="adm-bottom-label">More</span>
+            </button>
+          )}
         </nav>
       </main>
     </div>

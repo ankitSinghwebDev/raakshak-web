@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import {
   PlusOutlined, CloseOutlined, DeleteOutlined,
-  CrownOutlined, LoadingOutlined,
-  LockOutlined, IdcardOutlined,
+  CrownOutlined, LockOutlined, IdcardOutlined,
   StopOutlined, CheckCircleOutlined, ReloadOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { hashPassword } from '../../utils/hashPassword'
+import { ListSkeleton } from './AdminSkeleton'
 
 const ROLE_HIERARCHY = { 'Super Admin': 4, 'Admin': 3, 'Support': 2, 'Viewer': 1 }
 
@@ -19,7 +19,6 @@ const AdminManagement = ({ currentAdmin }) => {
   const [newAdmin, setNewAdmin] = useState({ name: '', empId: '', password: '', role: 'Admin' })
 
   const isSuperAdmin = currentAdmin?.role === 'Super Admin'
-  const myRank = ROLE_HIERARCHY[currentAdmin?.role] || 0
 
   const generateEmpId = (name) => {
     const first = (name || 'admin').trim().split(' ')[0].toLowerCase().replace(/[^a-z]/g, '')
@@ -53,10 +52,8 @@ const AdminManagement = ({ currentAdmin }) => {
 
   // Can current admin manage the target admin?
   const canManage = (targetAdmin) => {
-    if (targetAdmin.key === currentAdmin?.key) return false // can't manage self
-    if (!isSuperAdmin) return false // only Super Admin can manage
-    const targetRank = ROLE_HIERARCHY[targetAdmin.role] || 0
-    // Super Admin can manage anyone except other Super Admins
+    if (targetAdmin.key === currentAdmin?.key) return false
+    if (!isSuperAdmin) return false
     if (targetAdmin.role === 'Super Admin') return false
     return true
   }
@@ -149,7 +146,7 @@ const AdminManagement = ({ currentAdmin }) => {
     return 'default'
   }
 
-  if (loading) return <div className="adm-loading"><LoadingOutlined /> Loading admins...</div>
+  if (loading) return <ListSkeleton />
 
   if (!isSuperAdmin) {
     return <div className="adm-empty">Only Super Admins can access this page.</div>
