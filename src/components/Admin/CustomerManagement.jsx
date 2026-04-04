@@ -6,12 +6,8 @@ import {
   CheckCircleOutlined, StopOutlined,
 } from '@ant-design/icons'
 import { Tag } from 'antd'
-<<<<<<< HEAD
 import { db, ref, get, update, set } from '../../config/firebase'
 import { logAdminAction, ACTIONS } from '../../utils/auditLog'
-=======
-import { db, ref, get, update } from '../../config/firebase'
->>>>>>> main
 import { ListSkeleton } from './AdminSkeleton'
 
 const CustomerManagement = () => {
@@ -22,12 +18,9 @@ const CustomerManagement = () => {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
   const [exporting, setExporting] = useState(false)
-<<<<<<< HEAD
   const [editing, setEditing] = useState(null) // customer being edited
   const [editForm, setEditForm] = useState({ name: '', mobile: '', whatsapp: '', vehicle: '' })
   const [saving, setSaving] = useState(false)
-=======
->>>>>>> main
 
   useEffect(() => {
     const fetch = async () => {
@@ -72,13 +65,10 @@ const CustomerManagement = () => {
     try {
       await update(ref(db, `customers/${customer.key}`), { status: newStatus })
       setCustomers((prev) => prev.map((c) => c.key === customer.key ? { ...c, status: newStatus } : c))
-<<<<<<< HEAD
       await logAdminAction(
         newStatus === 'Suspended' ? ACTIONS.CUSTOMER_SUSPENDED : ACTIONS.CUSTOMER_REACTIVATED,
         customer.key, customer.vehicle, { name: customer.name, mobile: customer.mobile }
       )
-=======
->>>>>>> main
       toast.success(`${customer.vehicle} ${newStatus === 'Suspended' ? 'suspended' : 'reactivated'}`)
     } catch {
       toast.error('Failed to update')
@@ -117,7 +107,6 @@ const CustomerManagement = () => {
     }
   }
 
-<<<<<<< HEAD
   const openEdit = (customer) => {
     setEditing(customer)
     setEditForm({
@@ -158,8 +147,6 @@ const CustomerManagement = () => {
     }
   }
 
-=======
->>>>>>> main
   if (loading) return <ListSkeleton />
 
   return (
@@ -204,7 +191,6 @@ const CustomerManagement = () => {
           <tbody>
             {filtered.map((c) => (
               <tr key={c.key} className={c.status === 'Suspended' ? 'adm-row-suspended' : ''}>
-<<<<<<< HEAD
                 <td className="adm-td-name" title={c.name}>{c.name}</td>
                 <td className="adm-td-vehicle" title={c.vehicle}>{c.vehicle}</td>
                 <td title={c.mobile}>{c.mobile}</td>
@@ -221,23 +207,6 @@ const CustomerManagement = () => {
                     </button>
                     <button className="adm-btn-sm" onClick={() => openEdit(c)} title="Edit">✏️</button>
                     <button className={`adm-btn-sm ${c.status === 'Suspended' ? 'adm-btn-green' : 'adm-btn-red'}`} onClick={() => handleSuspend(c)} title={c.status === 'Suspended' ? 'Reactivate' : 'Suspend'}>
-=======
-                <td className="adm-td-name">{c.name}</td>
-                <td className="adm-td-vehicle">{c.vehicle}</td>
-                <td>{c.mobile}</td>
-                <td className="adm-td-id">{c.generatedId}</td>
-                <td><Tag color={c.plan === 'Lite Plan' ? 'default' : 'orange'}>{c.plan}</Tag></td>
-                <td><Tag color={c.status === 'Suspended' ? 'red' : 'green'}>{c.status}</Tag></td>
-                <td>₹{c.amount}</td>
-                <td>{c.coupon || '—'}</td>
-                <td className="adm-td-date">{c.timestamp ? new Date(c.timestamp).toLocaleDateString('en-IN') : '—'}</td>
-                <td>
-                  <div className="adm-actions">
-                    <button className="adm-btn-sm" onClick={() => setSelected(selected?.key === c.key ? null : c)}>
-                      {selected?.key === c.key ? <CloseOutlined /> : <EyeOutlined />}
-                    </button>
-                    <button className={`adm-btn-sm ${c.status === 'Suspended' ? 'adm-btn-green' : 'adm-btn-red'}`} onClick={() => handleSuspend(c)}>
->>>>>>> main
                       {c.status === 'Suspended' ? <CheckCircleOutlined /> : <StopOutlined />}
                     </button>
                   </div>
@@ -322,7 +291,6 @@ const CustomerManagement = () => {
         ))}
         {filtered.length === 0 && <p className="adm-empty">No customers found</p>}
       </div>
-<<<<<<< HEAD
 
       {/* Edit Customer Modal */}
       {editing && (
@@ -359,8 +327,6 @@ const CustomerManagement = () => {
           </div>
         </div>
       )}
-=======
->>>>>>> main
     </div>
   )
 }

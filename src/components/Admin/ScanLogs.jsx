@@ -139,21 +139,12 @@ const ScanLogs = () => {
           <tbody>
             {filtered.slice(0, 100).map((s) => (
               <tr key={s.id}>
-<<<<<<< HEAD
                 <td className="adm-td-date" title={s.timestamp ? new Date(s.timestamp).toLocaleString('en-IN') : '—'}>{s.timestamp ? new Date(s.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
                 <td className="adm-td-vehicle" title={s.vehicle}>{s.vehicle}</td>
                 <td className="adm-td-name" title={s.ownerName}>{s.ownerName}</td>
                 <td title={s.message || '—'}>{s.message || '—'}</td>
                 <td title={s.type}><Tag color={typeColor(s.type)}>{s.type}</Tag></td>
                 <td className="adm-td-device" title={s.deviceFingerprint || '—'}>{s.deviceFingerprint?.slice(0, 12) || '—'}</td>
-=======
-                <td className="adm-td-date">{s.timestamp ? new Date(s.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
-                <td className="adm-td-vehicle">{s.vehicle}</td>
-                <td className="adm-td-name">{s.ownerName}</td>
-                <td>{s.message || '—'}</td>
-                <td><Tag color={typeColor(s.type)}>{s.type}</Tag></td>
-                <td className="adm-td-device">{s.deviceFingerprint?.slice(0, 12) || '—'}</td>
->>>>>>> main
               </tr>
             ))}
           </tbody>

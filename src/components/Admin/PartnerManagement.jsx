@@ -7,10 +7,7 @@ import {
 } from '@ant-design/icons'
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
-<<<<<<< HEAD
 import { logAdminAction, ACTIONS } from '../../utils/auditLog'
-=======
->>>>>>> main
 import { ListSkeleton } from './AdminSkeleton'
 
 const PartnerManagement = () => {
@@ -19,12 +16,9 @@ const PartnerManagement = () => {
   const [showAdd, setShowAdd] = useState(false)
   const [newPartner, setNewPartner] = useState({ name: '', code: '', comm: '' })
   const [exporting, setExporting] = useState(false)
-<<<<<<< HEAD
   const [viewingPartner, setViewingPartner] = useState(null) // partner whose customers we're viewing
   const [partnerCustomers, setPartnerCustomers] = useState([])
   const [loadingCustomers, setLoadingCustomers] = useState(false)
-=======
->>>>>>> main
 
   useEffect(() => {
     const fetch = async () => {
@@ -58,10 +52,7 @@ const PartnerManagement = () => {
         status: 'active',
         createdAt: new Date().toISOString(),
       })
-<<<<<<< HEAD
       await logAdminAction(ACTIONS.PARTNER_CREATED, newPartner.code, newPartner.name, { comm: newPartner.comm })
-=======
->>>>>>> main
       toast.success('Partner added!')
       setShowAdd(false)
       setNewPartner({ name: '', code: '', comm: '' })
@@ -77,13 +68,10 @@ const PartnerManagement = () => {
     try {
       await update(ref(db, `partners/${partner.key}`), { status: newStatus })
       setPartners((prev) => prev.map((p) => p.key === partner.key ? { ...p, status: newStatus } : p))
-<<<<<<< HEAD
       await logAdminAction(
         newStatus === 'active' ? ACTIONS.PARTNER_ACTIVATED : ACTIONS.PARTNER_DEACTIVATED,
         partner.key, partner.name, { code: partner.code }
       )
-=======
->>>>>>> main
       toast.success(`${partner.name} ${newStatus}`)
     } catch {
       toast.error('Failed')
@@ -92,7 +80,6 @@ const PartnerManagement = () => {
 
   const markPaid = async (partner) => {
     try {
-<<<<<<< HEAD
       const paidAmount = partner.pendingComm || 0
       await update(ref(db, `partners/${partner.key}`), { pendingComm: 0, lastPaidAt: new Date().toISOString() })
       // Save payout record
@@ -106,17 +93,11 @@ const PartnerManagement = () => {
       setPartners((prev) => prev.map((p) => p.key === partner.key ? { ...p, pendingComm: 0 } : p))
       await logAdminAction(ACTIONS.PARTNER_COMMISSION_PAID, partner.key, partner.name, { amount: paidAmount })
       toast.success(`₹${paidAmount} commission paid for ${partner.name}`)
-=======
-      await update(ref(db, `partners/${partner.key}`), { pendingComm: 0, lastPaidAt: new Date().toISOString() })
-      setPartners((prev) => prev.map((p) => p.key === partner.key ? { ...p, pendingComm: 0 } : p))
-      toast.success(`Commission paid for ${partner.name}`)
->>>>>>> main
     } catch {
       toast.error('Failed')
     }
   }
 
-<<<<<<< HEAD
   const viewPartnerCustomers = async (partner) => {
     setViewingPartner(partner)
     setLoadingCustomers(true)
@@ -133,8 +114,6 @@ const PartnerManagement = () => {
     }
   }
 
-=======
->>>>>>> main
   const handleExportPartners = () => {
     setExporting(true)
     try {
@@ -220,10 +199,7 @@ const PartnerManagement = () => {
                         <DollarOutlined />
                       </button>
                     )}
-<<<<<<< HEAD
                     <button className="adm-btn-sm" onClick={() => viewPartnerCustomers(p)} title="View Customers">👥</button>
-=======
->>>>>>> main
                   </div>
                 </td>
               </tr>
@@ -284,7 +260,6 @@ const PartnerManagement = () => {
         ))}
         {partners.length === 0 && <p className="adm-empty">No partners yet</p>}
       </div>
-<<<<<<< HEAD
 
       {/* Partner Customers Modal */}
       {viewingPartner && (
@@ -325,8 +300,6 @@ const PartnerManagement = () => {
           </div>
         </div>
       )}
-=======
->>>>>>> main
     </div>
   )
 }
