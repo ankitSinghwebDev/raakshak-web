@@ -211,6 +211,24 @@
   background: #e57c23;
 }
 
+.btn-admin-login {
+  background: none;
+  color: #888;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+.btn-admin-login:hover {
+  border-color: #F28C38;
+  color: #F28C38;
+}
+
 .language-select {
   background: rgba(242, 140, 56, 0.1);
   border: 1px solid rgba(242, 140, 56, 0.3);

@@ -8,6 +8,9 @@ import EmergencyModal from './EmergencyModal'
 import UpdateNumberModal from './UpdateNumberModal'
 import UpgradePlanModal from './UpgradePlanModal'
 import SmartVaultModal from './SmartVaultModal'
+import MyVehiclesModal from './MyVehiclesModal'
+import SupportDrawer from './SupportDrawer'
+import usePushNotifications from '../../hooks/usePushNotifications'
 import './UserDashboard.css'
 
 const isPremiumUser = (plan) => {
@@ -21,6 +24,10 @@ const UserDashboard = () => {
   const [updateNumOpen, setUpdateNumOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
+  const [vehicleDetailsOpen, setVehicleDetailsOpen] = useState(false)
+  const [myVehiclesOpen, setMyVehiclesOpen] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
+  usePushNotifications(currentUser)
   const [recentScans, setRecentScans] = useState([])
   const [totalScans, setTotalScans] = useState(0)
 
@@ -133,29 +140,69 @@ const UserDashboard = () => {
           <title>Rakshak QR - ${currentUser.vehicle}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; font-family: -apple-system, sans-serif; }
-            .card { text-align: center; padding: 40px; border: 3px solid #F28C38; border-radius: 20px; max-width: 400px; }
-            .logo { font-size: 28px; font-weight: 900; color: #F28C38; letter-spacing: 3px; margin-bottom: 4px; }
-            .tagline { font-size: 10px; color: #888; letter-spacing: 2px; margin-bottom: 24px; }
-            .qr img { width: 280px; height: 280px; }
-            .vehicle { font-size: 24px; font-weight: 900; color: #F28C38; letter-spacing: 3px; margin-top: 20px; }
-            .scan-text { font-size: 11px; color: #888; margin-top: 8px; letter-spacing: 1px; }
-            .id { font-size: 12px; color: #aaa; margin-top: 12px; }
-            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f5f5f5; font-family: -apple-system, sans-serif; }
+            .sticker {
+              width: 480px; background: #fff; border-radius: 16px; overflow: hidden;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 2px solid #e0e0e0;
+            }
+            .sticker-top {
+              display: flex; align-items: center; padding: 16px 20px; gap: 16px;
+            }
+            .logo-section {
+              display: flex; flex-direction: column; align-items: center; min-width: 90px;
+            }
+            .logo-section img { width: 60px; border-radius: 10px; margin-bottom: 4px; }
+            .logo-section .brand { font-size: 12px; font-weight: 900; color: #1a1a1a; letter-spacing: 2px; }
+            .logo-section .sub { font-size: 6px; color: #888; letter-spacing: 1px; font-weight: 700; }
+            .middle {
+              flex: 1; text-align: center;
+            }
+            .middle h2 {
+              font-size: 20px; font-weight: 900; color: #1a1a1a; letter-spacing: 1px; line-height: 1.3;
+            }
+            .middle .tagline {
+              font-size: 8px; color: #999; font-weight: 700; letter-spacing: 0.5px; margin-top: 4px;
+            }
+            .qr-section { display: flex; align-items: center; }
+            .qr-section img { width: 90px; height: 90px; }
+            .vehicle-bar {
+              background: #F28C38; padding: 12px 20px; text-align: center;
+            }
+            .vehicle-bar span {
+              color: #fff; font-size: 24px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;
+            }
+            @media print {
+              body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              .sticker { box-shadow: none; border: 2px solid #ddd; }
+            }
           </style>
         </head>
         <body>
-          <div class="card">
-            <div class="logo">RAKSHAK</div>
-            <div class="tagline">HAR GAADI KA GUARDIAN</div>
-            <div class="qr"><img src="${qrUrlHD}" /></div>
-            <div class="vehicle">${currentUser.vehicle}</div>
-            <div class="scan-text">SCAN TO INFORM VEHICLE OWNER</div>
-            <div class="id">${currentUser.generatedId}</div>
+          <div class="sticker">
+            <div class="sticker-top">
+              <div class="logo-section">
+                <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" />
+                <span class="brand">RAKSHAK</span>
+                <span class="sub">HAR GAADI KA GUARDIAN</span>
+              </div>
+              <div class="middle">
+                <h2>SCAN TO<br>INFORM</h2>
+                <p class="tagline">Wrong Parking? Emergency? Just Scan.</p>
+              </div>
+              <div class="qr-section">
+                <img src="${qrUrlHD}" />
+              </div>
+            </div>
+            <div class="vehicle-bar">
+              <span>${currentUser.vehicle}</span>
+            </div>
           </div>
           <script>
-            const img = document.querySelector('img');
-            img.onload = () => { window.print(); };
+            const imgs = document.querySelectorAll('img');
+            let loaded = 0;
+            imgs.forEach(img => {
+              img.onload = () => { loaded++; if (loaded === imgs.length) window.print(); };
+            });
           </script>
         </body>
       </html>
@@ -189,7 +236,7 @@ const UserDashboard = () => {
       </nav>
 
       {/* ===== HERO CARD ===== */}
-      <section className="db-hero">
+      <section className="db-hero" onClick={() => setVehicleDetailsOpen(!vehicleDetailsOpen)} style={{ cursor: 'pointer' }}>
         <div className="db-hero-left">
           <p className="db-hero-greeting">Welcome back,</p>
           <h1 className="db-hero-name">{currentUser.name}</h1>
@@ -198,6 +245,7 @@ const UserDashboard = () => {
             <span className="db-hero-id">{currentUser.generatedId}</span>
           </div>
           <p className="db-hero-mobile">📞 +91 {currentUser.mobile}</p>
+          <p className="db-hero-tap-hint">{vehicleDetailsOpen ? '▲ Tap to collapse' : '▼ Tap to see vehicle details'}</p>
         </div>
         <div className="db-hero-right">
           <div className="db-shield">
@@ -207,6 +255,54 @@ const UserDashboard = () => {
           </div>
         </div>
       </section>
+
+      {/* ===== VEHICLE DETAILS (Expandable) ===== */}
+      {vehicleDetailsOpen && (
+        <section className="db-vehicle-details">
+          <div className="db-vd-grid">
+            <div className="db-vd-item">
+              <span className="db-vd-label">Owner Name</span>
+              <span className="db-vd-value">{currentUser.name}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Vehicle Number</span>
+              <span className="db-vd-value">{currentUser.vehicle}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Mobile</span>
+              <span className="db-vd-value">+91 {currentUser.mobile}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">WhatsApp</span>
+              <span className="db-vd-value">+91 {currentUser.whatsapp || currentUser.mobile}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Rakshak ID</span>
+              <span className="db-vd-value highlight">{currentUser.generatedId}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Plan</span>
+              <span className="db-vd-value">{currentUser.plan}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Payment Status</span>
+              <span className="db-vd-value db-paid">{currentUser.status}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Payment ID</span>
+              <span className="db-vd-value" style={{ fontSize: '11px' }}>{currentUser.paymentId || '—'}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Coupon Used</span>
+              <span className="db-vd-value">{currentUser.coupon || '—'}</span>
+            </div>
+            <div className="db-vd-item">
+              <span className="db-vd-label">Registered On</span>
+              <span className="db-vd-value">{currentUser.timestamp ? new Date(currentUser.timestamp).toLocaleString('en-IN') : '—'}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== STATS ===== */}
       <section className="db-stats">
@@ -260,11 +356,11 @@ const UserDashboard = () => {
             <div className="db-action-icon">🚨</div>
             <span>Emergency</span>
           </button>
-          <button className="db-action">
+          <button className="db-action" onClick={() => setMyVehiclesOpen(true)}>
             <div className="db-action-icon">🚗</div>
             <span>My Vehicles</span>
           </button>
-          <button className="db-action">
+          <button className="db-action" onClick={() => setSupportOpen(true)}>
             <div className="db-action-icon">💬</div>
             <span>Support</span>
           </button>
@@ -313,20 +409,36 @@ const UserDashboard = () => {
         </div>
       </section>
 
-      {/* ===== QR + INFO ===== */}
-      <section className="db-bottom">
-        <div className="db-qr-card">
-          <p className="db-qr-title">Your Rakshak QR</p>
-          <div className="db-qr-frame">
-            <img src={qrUrl} alt="QR Code" />
+      {/* ===== QR STICKER (FASTag Style) ===== */}
+      <section className="db-section">
+        <h3 className="db-section-title">Your Rakshak QR Sticker</h3>
+        <div className="db-sticker">
+          <div className="db-sticker-top">
+            <div className="db-sticker-logo">
+              <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak" />
+              <span className="db-sticker-brand">RAKSHAK</span>
+              <span className="db-sticker-sub">HAR GAADI KA GUARDIAN</span>
+            </div>
+            <div className="db-sticker-middle">
+              <h2>SCAN TO<br />INFORM</h2>
+              <p className="db-sticker-tagline">Wrong Parking? Emergency? Just Scan.</p>
+            </div>
+            <div className="db-sticker-qr">
+              <img src={qrUrl} alt="QR Code" />
+            </div>
           </div>
-          <p className="db-qr-vnum">{currentUser.vehicle}</p>
-          <p className="db-qr-hint">Scan to inform vehicle owner</p>
-          <div className="db-qr-actions">
-            <button className="db-qr-btn" onClick={handleDownloadQR}>⬇️ Download</button>
-            <button className="db-qr-btn db-qr-btn-print" onClick={handlePrintQR}>🖨️ Print</button>
+          <div className="db-sticker-bar">
+            <span>{currentUser.vehicle}</span>
           </div>
         </div>
+        <div className="db-qr-actions">
+          <button className="db-qr-btn" onClick={handleDownloadQR}>⬇️ Download QR</button>
+          <button className="db-qr-btn db-qr-btn-print" onClick={handlePrintQR}>🖨️ Print Sticker</button>
+        </div>
+      </section>
+
+      {/* ===== ACCOUNT INFO ===== */}
+      <section className="db-bottom">
 
         <div className="db-info-card">
           <p className="db-info-title">Account Details</p>
@@ -397,6 +509,8 @@ const UserDashboard = () => {
       <UpdateNumberModal open={updateNumOpen} onClose={() => setUpdateNumOpen(false)} />
       <UpgradePlanModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
       <SmartVaultModal open={vaultOpen} onClose={() => setVaultOpen(false)} />
+      <MyVehiclesModal open={myVehiclesOpen} onClose={() => setMyVehiclesOpen(false)} />
+      <SupportDrawer open={supportOpen} onClose={() => setSupportOpen(false)} />
     </div>
   )
 }

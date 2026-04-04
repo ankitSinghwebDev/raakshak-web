@@ -82,9 +82,8 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
     setSubmitting(true)
     const vehicle = vehicleNum.toUpperCase()
     const appliedCoupon = couponCode.trim().toUpperCase()
-    const isDev = import.meta.env.DEV
 
-    // Save to Firebase (shared between dev bypass and payment handler)
+    // Save to Firebase after successful payment
     const saveToFirebase = async (paymentId) => {
       const customersRef = ref(db, 'customers')
       const generatedID = 'RKSK' + Math.floor(1000 + Math.random() * 9000)
@@ -102,7 +101,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
         amount: activePrice,
         paymentId: paymentId,
         coupon: appliedCoupon,
-        status: isDev ? 'Dev-Free' : 'Paid',
+        status: 'Paid',
         qrLink: qrLink,
         timestamp: new Date().toISOString(),
       }
@@ -110,41 +109,6 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
       await set(newCustomerRef, formData)
 
       return { generatedID, qrLink }
-    }
-
-    // DEV MODE: Skip payment
-    if (isDev) {
-      try {
-        const { generatedID, qrLink } = await saveToFirebase('DEV_BYPASS_' + Date.now())
-
-        // Partner stats (same logic)
-        const partnersRef = ref(db, 'partners')
-        const partnerQuery = query(partnersRef, orderByChild('code'), equalTo(appliedCoupon))
-        const partnerSnap = await get(partnerQuery)
-        if (partnerSnap.exists()) {
-          const partnerKey = Object.keys(partnerSnap.val())[0]
-          const partnerData = Object.values(partnerSnap.val())[0]
-          const partnerComm = parseFloat(partnerData.comm) || 0
-          await update(ref(db, `partners/${partnerKey}`), {
-            totalSales: increment(1),
-            totalRevenue: increment(activePrice),
-            pendingComm: increment(partnerComm),
-          })
-        }
-
-        const qrUrl = generateQRCodeUrl(qrLink, 150)
-        resetForm()
-        onClose()
-        if (onSuccess) {
-          onSuccess({ generatedId: generatedID, vehicleNum: vehicle, qrUrl })
-        }
-      } catch (err) {
-        console.error('Dev save error:', err)
-        toast.error('Firebase error: ' + err.message)
-      } finally {
-        setSubmitting(false)
-      }
-      return
     }
 
     // PRODUCTION: Razorpay payment

@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "customers": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["mobile", "generatedId"]
+    },
+    "scans": {
+      ".read": true,
+      ".write": true
+    },
+    "admins": {
+      ".read": true,
+      ".write": true
+    },
+    "partners": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["code"]
+    },
+    "support": {
+      ".read": true,
+      ".write": true
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
