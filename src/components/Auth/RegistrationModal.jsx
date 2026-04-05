@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { RAZORPAY_KEY, TAG_PRICES, COMPARISON_TABLE } from '../../utils/constants'
-import { validateMobileNumber, generateQRCodeUrl } from '../../utils/helpers'
+import { validateMobileNumber, generateQRCodeUrl, buildPublicSiteUrl } from '../../utils/helpers'
 import { db, ref, push, set, get, update, query, orderByChild, equalTo, increment } from '../../config/firebase'
 import useBodyLock from '../../hooks/useBodyLock'
 import './RegistrationModal.css'
@@ -89,7 +89,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
       const generatedID = 'RKSK' + Math.floor(1000 + Math.random() * 9000)
       const newCustomerRef = push(customersRef)
 
-      const qrLink = `${window.location.origin}/scan?id=${generatedID}`
+      const qrLink = buildPublicSiteUrl('/scan', { id: generatedID })
 
       const formData = {
         generatedId: generatedID,

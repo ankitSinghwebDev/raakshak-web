@@ -9,7 +9,7 @@ import {
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { logAdminAction, ACTIONS } from '../../utils/auditLog'
-import { generateQRCodeUrl } from '../../utils/helpers'
+import { generateQRCodeUrl, buildPublicSiteUrl } from '../../utils/helpers'
 import { ListSkeleton } from './AdminSkeleton'
 import logoImg from '../../assets/icons/Rakshak.jpg'
 
@@ -51,7 +51,7 @@ const generatePartnerCode = (type, partners, editingKey = null) => {
   return `${prefix}${String(maxCounter + 1).padStart(2, '0')}`
 }
 
-const getPartnerQrValue = (partner) => `${window.location.origin}/?coupon=${partner.code}`
+const getPartnerQrValue = (partner) => buildPublicSiteUrl('/', { coupon: partner.code })
 
 const escapeXml = (value) => String(value || '')
   .replace(/&/g, '&amp;')

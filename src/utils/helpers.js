@@ -44,6 +44,32 @@ export const generateQRCodeUrl = (data, size = 200) => {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}`
 }
 
+export const getPublicSiteUrl = () => {
+  const envUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.trim()
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '')
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+
+  return ''
+}
+
+export const buildPublicSiteUrl = (path = '/', params = {}) => {
+  const baseUrl = getPublicSiteUrl()
+  const url = new URL(path, `${baseUrl}/`)
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, value)
+    }
+  })
+
+  return url.toString()
+}
+
 export const getFileExtension = (file) => {
   return file.name.split('.').pop()
 }

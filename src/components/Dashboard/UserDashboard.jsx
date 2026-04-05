@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
-import { generateQRCodeUrl } from '../../utils/helpers'
+import { generateQRCodeUrl, buildPublicSiteUrl } from '../../utils/helpers'
 import { db, ref, onValue } from '../../config/firebase'
 import EmergencyModal from './EmergencyModal'
 import UpdateNumberModal from './UpdateNumberModal'
@@ -116,8 +116,7 @@ const UserDashboard = () => {
     }
   }
 
-  // Always use current domain for QR — fixes localhost QR codes
-  const qrLink = `${window.location.origin}/scan?id=${currentUser.generatedId}`
+  const qrLink = buildPublicSiteUrl('/scan', { id: currentUser.generatedId })
   const qrUrl = generateQRCodeUrl(qrLink, 200)
   const qrUrlHD = generateQRCodeUrl(qrLink, 600) // High-res for print/download
 
