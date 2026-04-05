@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
 import { Helmet } from 'react-helmet-async'
@@ -11,6 +12,15 @@ import About from '../components/Admin/About'
 
 const AnimatedRoutes = () => {
   const location = useLocation()
+
+  useEffect(() => {
+    if (location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(location.hash)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [location])
 
   return (
     <div key={location.pathname} className="page-transition">

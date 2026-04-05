@@ -32,11 +32,11 @@ const Header = ({ language, setLanguage, onLoginClick, onSupportTicket }) => {
         </button>
 
         <nav className="nav-desktop">
-          <a href="#features">{t('navWhyRakshak')}</a>
-          <a href="#premium-tools">{t('navPremiumTools')}</a>
-          <a href="#services">{t('navServices')}</a>
+          <Link to="/#features">{t('navWhyRakshak')}</Link>
+          <Link to="/#premium-tools">{t('navPremiumTools')}</Link>
+          <Link to="/#services">{t('navServices')}</Link>
           <Link to="/about">{t('navAboutUs')}</Link>
-          <a href="#contact">{t('navContact')}</a>
+          <Link to="/#contact">{t('navContact')}</Link>
         </nav>
 
         <div className="nav-right">
@@ -65,11 +65,11 @@ const Header = ({ language, setLanguage, onLoginClick, onSupportTicket }) => {
               <img src={logoImg} alt="Rakshak" className="mobile-menu-logo" />
               <span className="mobile-menu-brand">RAKSHAK</span>
             </div>
-            <a href="#features" onClick={handleNavClick}>{t('navWhyRakshak')}</a>
-            <a href="#premium-tools" onClick={handleNavClick}>{t('navPremiumTools')}</a>
-            <a href="#services" onClick={handleNavClick}>{t('navServices')}</a>
+            <Link to="/#features" onClick={handleNavClick}>{t('navWhyRakshak')}</Link>
+            <Link to="/#premium-tools" onClick={handleNavClick}>{t('navPremiumTools')}</Link>
+            <Link to="/#services" onClick={handleNavClick}>{t('navServices')}</Link>
             <Link to="/about" onClick={handleNavClick}>{t('navAboutUs')}</Link>
-            <a href="#contact" onClick={handleNavClick}>{t('navContact')}</a>
+            <Link to="/#contact" onClick={handleNavClick}>{t('navContact')}</Link>
             <div className="mobile-divider" />
             <button className="mobile-link highlight-link" onClick={() => { closeMenu(); onLoginClick('user') }}>{t('navLoginPortal')}</button>
             <button className="mobile-link" onClick={() => { closeMenu(); onLoginClick('partner') }}>{t('navPartnerLogin')}</button>
