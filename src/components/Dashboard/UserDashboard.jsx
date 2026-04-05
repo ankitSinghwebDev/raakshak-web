@@ -463,28 +463,38 @@ const UserDashboard = () => {
       {/* ===== QR STICKER (FASTag Style) ===== */}
       <section className="db-section">
         <h3 className="db-section-title">Your Rakshak QR Sticker</h3>
-        <div className="db-sticker">
-          <div className="db-sticker-top">
-            <div className="db-sticker-logo">
-              <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak" />
-              <span className="db-sticker-brand">RAKSHAK</span>
-              <span className="db-sticker-sub">HAR GAADI KA GUARDIAN</span>
-            </div>
-            <div className="db-sticker-middle">
-              <h2>SCAN TO<br />INFORM</h2>
-              <p className="db-sticker-tagline">Wrong Parking? Emergency? Just Scan.</p>
-            </div>
-            <div className="db-sticker-qr">
-              <img src={qrUrl} alt="QR Code" />
+        <div className="db-sticker-layout">
+          <div className="db-sticker-panel">
+            <div className="db-sticker">
+              <div className="db-sticker-top">
+                <div className="db-sticker-logo">
+                  <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak" />
+                  <span className="db-sticker-brand">RAKSHAK</span>
+                  <span className="db-sticker-sub">HAR GAADI KA GUARDIAN</span>
+                </div>
+                <div className="db-sticker-middle">
+                  <h2>SCAN TO<br />INFORM</h2>
+                  <p className="db-sticker-tagline">Wrong Parking? Emergency? Just Scan.</p>
+                </div>
+                <div className="db-sticker-qr">
+                  <img src={qrUrl} alt="QR Code" />
+                </div>
+              </div>
+              <div className="db-sticker-bar">
+                <span>{currentUser.vehicle}</span>
+              </div>
             </div>
           </div>
-          <div className="db-sticker-bar">
-            <span>{currentUser.vehicle}</span>
+          <div className="db-sticker-side">
+            <div className="db-sticker-side-head">
+              <span className="db-sticker-side-label">Sticker Actions</span>
+              <p>Download the QR or print the full visiting-card style sticker.</p>
+            </div>
+            <div className="db-qr-actions">
+              <button className="db-qr-btn" onClick={handleDownloadQR}>⬇️ Download QR</button>
+              <button className="db-qr-btn db-qr-btn-print" onClick={handlePrintQR}>🖨️ Print Sticker</button>
+            </div>
           </div>
-        </div>
-        <div className="db-qr-actions">
-          <button className="db-qr-btn" onClick={handleDownloadQR}>⬇️ Download QR</button>
-          <button className="db-qr-btn db-qr-btn-print" onClick={handlePrintQR}>🖨️ Print Sticker</button>
         </div>
       </section>
 
