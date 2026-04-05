@@ -31,6 +31,7 @@ export const ACTIONS = {
   CUSTOMER_REACTIVATED: 'customer_reactivated',
   CUSTOMER_EDITED: 'customer_edited',
   PARTNER_CREATED: 'partner_created',
+  PARTNER_UPDATED: 'partner_updated',
   PARTNER_DEACTIVATED: 'partner_deactivated',
   PARTNER_ACTIVATED: 'partner_activated',
   PARTNER_COMMISSION_PAID: 'partner_commission_paid',

@@ -93,9 +93,16 @@ export const exportAllData = async () => {
     Object.entries(partnerSnap.val()).forEach(([key, p]) => {
       partners.push({
         'Partner Name': p.name || '—',
-        'Coupon Code': p.code || '—',
+        'Shop Name': p.shop || '—',
+        'Shop Type': p.type || '—',
+        'Partner Code': p.code || '—',
+        'Mobile': p.mobile || '—',
+        'Address': p.address || '—',
+        'City': p.city || '—',
+        'State': p.state || '—',
+        'Pin Code': p.pin || '—',
         'Status': (p.status || 'active').toUpperCase(),
-        'Commission %': p.comm || 0,
+        'Commission Amount (₹)': p.comm || 0,
         'Total Sales': p.totalSales || 0,
         'Total Revenue (₹)': p.totalRevenue || 0,
         'Pending Commission (₹)': p.pendingComm || 0,

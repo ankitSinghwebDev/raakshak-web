@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { LockOutlined, IdcardOutlined, LoadingOutlined, HomeOutlined, MailOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import { LockOutlined, IdcardOutlined, LoadingOutlined, HomeOutlined, MailOutlined, ArrowLeftOutlined, CloseOutlined } from '@ant-design/icons'
 import { db, ref, get, functions, httpsCallable } from '../../config/firebase'
 import { verifyPassword, hashPassword } from '../../utils/hashPassword'
 import PasswordInput from '../ui/PasswordInput'
@@ -139,6 +139,9 @@ const AdminLogin = ({ onLogin }) => {
   return (
     <div className="adm-login-page">
       <div className="adm-login-card">
+        <Link to="/" className="adm-login-close" aria-label="Close admin login">
+          <CloseOutlined />
+        </Link>
         <div className="adm-login-icon"><img src={logoImg} alt="Rakshak" className="adm-login-logo" /></div>
 
         {/* ===== LOGIN SCREEN ===== */}

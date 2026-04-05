@@ -90,6 +90,36 @@
   line-height: 1.5;
 }
 
+.scan-cooldown-box {
+  margin-bottom: 18px;
+  padding: 16px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(242, 140, 56, 0.22);
+  background: linear-gradient(180deg, rgba(242, 140, 56, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.scan-cooldown-timer {
+  color: #F28C38;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.scan-cooldown-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.scan-cooldown-text {
+  color: #9a9a9a;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
 /* SOS Button */
 .scan-sos-btn {
   width: 100%;
@@ -113,6 +143,12 @@
 }
 .scan-sos-btn:active { transform: scale(0.97); }
 .scan-sos-icon { font-size: 20px; }
+.scan-sos-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
 
 /* Contact Button */
 .scan-contact-btn {
@@ -135,6 +171,14 @@
   transition: all 0.3s;
 }
 .scan-contact-btn:active { background: rgba(242, 140, 56, 0.15); border-color: #F28C38; }
+.scan-contact-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #777;
+  transform: none;
+}
 
 /* Emergency Services */
 .scan-emergency-row {
@@ -211,6 +255,12 @@
 }
 
 .scan-msg-btn:active { transform: scale(0.98); }
+.scan-msg-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  box-shadow: none;
+}
 
 .scan-msg-icon { font-size: 20px; flex-shrink: 0; }
 
@@ -309,6 +359,15 @@
   .scan-em-btn:hover { border-color: #ff4d4d; background: rgba(255, 0, 0, 0.06); color: #ff4d4d; }
   .scan-msg-btn:hover { border-color: #F28C38; background: rgba(242, 140, 56, 0.04); }
   .scan-msg-emergency:hover { border-color: #ff4d4d; background: rgba(255, 77, 77, 0.06); }
+  .scan-sos-btn:disabled:hover,
+  .scan-contact-btn:disabled:hover,
+  .scan-msg-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: inherit;
+    background: inherit;
+    color: inherit;
+  }
 }
 
 @media (max-width: 380px) {

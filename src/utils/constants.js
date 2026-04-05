@@ -203,6 +203,7 @@ export const PREMIUM_TOOLS = [
     status: 'locked',
     buttonText: 'ACTIVATE PRO'
   }
+  
 ]
 
 export const SERVICES = [
