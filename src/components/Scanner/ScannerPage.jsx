@@ -82,16 +82,21 @@ const ScannerPage = () => {
   const [screen, setScreen] = useState('main') // main | messages | sent | rate-limited
   const [sending, setSending] = useState(false)
   const [cooldownEndsAt, setCooldownEndsAt] = useState(null)
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
     setCooldownEndsAt(getStoredCooldown(id))
+    setNow(Date.now())
   }, [id])
 
   useEffect(() => {
     if (!cooldownEndsAt) return
 
     const syncCooldown = () => {
-      if (cooldownEndsAt <= Date.now()) {
+      const currentTime = Date.now()
+      setNow(currentTime)
+
+      if (cooldownEndsAt <= currentTime) {
         if (id) localStorage.removeItem(getCooldownStorageKey(id))
         setCooldownEndsAt(null)
       }
@@ -102,7 +107,7 @@ const ScannerPage = () => {
     return () => window.clearInterval(timer)
   }, [cooldownEndsAt, id])
 
-  const cooldownRemaining = cooldownEndsAt ? Math.max(0, cooldownEndsAt - Date.now()) : 0
+  const cooldownRemaining = cooldownEndsAt ? Math.max(0, cooldownEndsAt - now) : 0
   const cooldownActive = cooldownRemaining > 0
   const cooldownText = formatCooldown(cooldownRemaining)
 
