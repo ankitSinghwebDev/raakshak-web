@@ -14,6 +14,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 admin.initializeApp();
 
@@ -180,6 +181,103 @@ exports.sendAdminOTP = functions.https.onCall(async (data, context) => {
 
 // ==========================================
 // 3. Verify OTP & Reset Password
+// ==========================================
+// ==========================================
+// 3. Mint Firebase Auth Token for Vault Access
+// ==========================================
+
+/**
+ * Verify vault PIN server-side using the same PBKDF2 params as the client.
+ * Returns true if the candidate PIN matches the stored hash.
+ */
+const verifyVaultPin = (pin, pinSaltB64, pinHashB64) => new Promise((resolve, reject) => {
+  const salt = Buffer.from(pinSaltB64, 'base64');
+  const pinBuf = Buffer.from(pin, 'utf8');
+  // PBKDF2: SHA-256, 150 000 iterations, 256-bit (32 bytes) — mirrors vaultCrypto.js
+  crypto.pbkdf2(pinBuf, salt, 150000, 32, 'sha256', (err, derived) => {
+    if (err) return reject(err);
+    resolve(derived.toString('base64') === pinHashB64);
+  });
+});
+
+const MAX_PIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+exports.mintVaultToken = functions.https.onCall(async (data, context) => {
+  const { customerKey, pin } = data;
+
+  if (!customerKey || typeof customerKey !== 'string') {
+    throw new functions.https.HttpsError('invalid-argument', 'Customer key is required');
+  }
+  if (!pin || typeof pin !== 'string' || pin.length !== 4) {
+    throw new functions.https.HttpsError('invalid-argument', 'A 4-digit vault PIN is required');
+  }
+
+  const rateLimitRef = admin.database().ref(`vaultRateLimit/${customerKey}`);
+
+  try {
+    // Step 1: Check rate limit
+    console.log('mintVaultToken: checking rate limit for', customerKey);
+    const rlSnap = await rateLimitRef.once('value');
+    const rl = rlSnap.val();
+
+    if (rl && rl.attempts >= MAX_PIN_ATTEMPTS) {
+      const elapsed = Date.now() - rl.lastAttempt;
+      if (elapsed < LOCKOUT_DURATION_MS) {
+        const minutesLeft = Math.ceil((LOCKOUT_DURATION_MS - elapsed) / 60000);
+        throw new functions.https.HttpsError(
+          'resource-exhausted',
+          `Too many failed attempts. Try again in ${minutesLeft} minute(s).`
+        );
+      }
+      await rateLimitRef.remove();
+    }
+
+    // Step 2: Read vault metadata
+    console.log('mintVaultToken: reading vault metadata');
+    const vaultSnap = await admin.database().ref(`customers/${customerKey}/vault`).once('value');
+
+    if (!vaultSnap.exists()) {
+      throw new functions.https.HttpsError('not-found', 'Vault not found');
+    }
+
+    const vault = vaultSnap.val();
+
+    if (!vault.pinHash || !vault.pinSalt) {
+      throw new functions.https.HttpsError('failed-precondition', 'Vault PIN not configured');
+    }
+
+    // Step 3: Verify PIN
+    console.log('mintVaultToken: verifying PIN');
+    const pinValid = await verifyVaultPin(pin, vault.pinSalt, vault.pinHash);
+
+    if (!pinValid) {
+      const currentAttempts = (rl && rl.lastAttempt && (Date.now() - rl.lastAttempt < LOCKOUT_DURATION_MS)) ? rl.attempts : 0;
+      await rateLimitRef.set({ attempts: currentAttempts + 1, lastAttempt: Date.now() });
+
+      const remaining = MAX_PIN_ATTEMPTS - (currentAttempts + 1);
+      if (remaining <= 0) {
+        throw new functions.https.HttpsError('resource-exhausted', 'Too many failed attempts. Vault locked for 15 minutes.');
+      }
+      throw new functions.https.HttpsError('permission-denied', `Incorrect vault PIN. ${remaining} attempt(s) remaining.`);
+    }
+
+    // Step 4: Mint custom token
+    console.log('mintVaultToken: PIN valid, minting custom token');
+    await rateLimitRef.remove();
+    const customToken = await admin.auth().createCustomToken(customerKey);
+    console.log('mintVaultToken: success');
+
+    return { token: customToken };
+  } catch (error) {
+    if (error instanceof functions.https.HttpsError) throw error;
+    console.error('mintVaultToken CRASHED at unexpected point:', error.message, error.stack);
+    throw new functions.https.HttpsError('internal', 'Failed to authenticate vault access');
+  }
+});
+
+// ==========================================
+// 4. Verify OTP & Reset Password
 // ==========================================
 exports.verifyAdminOTP = functions.https.onCall(async (data, context) => {
   const { adminKey, otp, newPasswordHash } = data;

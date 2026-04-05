@@ -1,17 +1,13 @@
-/* Smart Vault Modal */
 .sv-modal {
-  max-width: 460px !important;
-}
-
-.sv-loading {
-  text-align: center;
-  color: #888;
-  padding: 60px 20px;
-  font-size: 14px;
+  max-width: 440px !important;
+  width: min(92vw, 440px);
+  padding: 24px 20px !important;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .sv-screen {
-  animation: svFadeIn 0.3s ease-out;
+  animation: svFadeIn 0.28s ease-out;
 }
 
 @keyframes svFadeIn {
@@ -19,16 +15,15 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Header */
 .sv-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .sv-icon {
-  font-size: 44px;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 12px rgba(242, 140, 56, 0.3));
+  font-size: 40px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 18px rgba(242, 140, 56, 0.28));
 }
 
 .sv-header h2 {
@@ -36,17 +31,20 @@
   font-size: 22px;
   font-weight: 900;
   margin-bottom: 6px;
+  letter-spacing: -0.6px;
 }
 
 .sv-header p {
-  color: #666;
+  color: #707070;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
-/* Fields */
 .sv-field {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .sv-field label {
@@ -54,19 +52,19 @@
   color: #F28C38;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .sv-input {
   width: 100%;
-  padding: 15px 18px;
+  padding: 14px 16px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-align: center;
@@ -77,14 +75,14 @@
 
 .sv-pin-input {
   width: 100%;
-  padding: 18px;
+  padding: 16px;
   background: rgba(255, 255, 255, 0.04);
   border: 2px solid rgba(242, 140, 56, 0.2);
   border-radius: 14px;
   color: #F28C38;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
-  letter-spacing: 16px;
+  letter-spacing: 14px;
   text-align: center;
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
@@ -105,7 +103,7 @@
 
 .sv-pin-input::placeholder {
   color: #333;
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 10px;
 }
 
@@ -114,7 +112,7 @@
   font-size: 12px;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding: 10px;
   background: rgba(255, 77, 77, 0.06);
   border: 1px solid rgba(255, 77, 77, 0.15);
@@ -123,23 +121,24 @@
 
 .sv-submit {
   width: 100%;
-  padding: 16px;
+  padding: 15px;
   background: linear-gradient(90deg, #F28C38, #ff6a00);
   color: #000;
   border: none;
   border-radius: 14px;
   font-weight: 900;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.5px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.3s;
   margin-top: 6px;
+  min-height: 50px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sv-submit:hover:not(:disabled) {
-  box-shadow: 0 10px 30px rgba(242, 140, 56, 0.3);
-  transform: translateY(-1px);
+.sv-submit:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .sv-submit:disabled {
@@ -147,96 +146,175 @@
   cursor: not-allowed;
 }
 
-/* Vault Grid */
+.sv-security-note {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(242, 140, 56, 0.06);
+  border: 1px solid rgba(242, 140, 56, 0.14);
+  color: #b8b8b8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
 .sv-vault-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .sv-doc-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 20px 14px;
-  text-align: center;
-  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.3s;
 }
 
-.sv-doc-card:hover {
-  border-color: rgba(242, 140, 56, 0.2);
+.sv-doc-card:active {
+  border-color: rgba(242, 140, 56, 0.22);
 }
 
 .sv-doc-icon {
-  font-size: 32px;
-  margin-bottom: 10px;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.sv-doc-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .sv-doc-card h4 {
   color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.3px;
-  margin-bottom: 6px;
-  line-height: 1.4;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 3px;
 }
 
-.sv-doc-card p {
-  color: #555;
+.sv-doc-status {
+  color: #5f5f5f;
   font-size: 10px;
-  font-weight: 600;
-  margin-bottom: 12px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.sv-doc-status-live {
+  color: #F28C38;
+}
+
+.sv-doc-file {
+  display: block;
+  color: #8d8d8d;
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.sv-hidden-input {
+  display: none;
+}
+
+.sv-doc-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
 }
 
 .sv-doc-btn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #666;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 9px;
   font-weight: 900;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sv-doc-btn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+}
+
+.sv-doc-btn-primary {
+  background: linear-gradient(90deg, #F28C38, #ff6a00);
+  border: none;
+  color: #000;
+  cursor: pointer;
+}
+
+.sv-doc-btn-primary:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.sv-doc-btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #d6d6d6;
+  cursor: pointer;
+}
+
+.sv-doc-btn-secondary:active:not(:disabled) {
+  border-color: rgba(242, 140, 56, 0.3);
+  color: #fff;
 }
 
 .sv-vault-footer {
   text-align: center;
-  color: #444;
+  color: #5c5c5c;
   font-size: 10px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .sv-modal {
-    padding: 22px 16px !important;
+    width: 100vw;
+    max-width: 100vw;
+    min-height: 100dvh;
+    border-radius: 0 !important;
+    padding: 20px 16px !important;
   }
 
   .sv-header h2 {
-    font-size: 19px;
+    font-size: 20px;
+  }
+
+  .sv-header p {
+    font-size: 11px;
   }
 
   .sv-pin-input {
-    font-size: 24px;
+    font-size: 22px;
     letter-spacing: 12px;
-    padding: 16px;
+    padding: 14px;
   }
 
-  .sv-vault-grid {
-    grid-template-columns: 1fr;
+  .sv-doc-card {
+    padding: 14px 12px;
     gap: 10px;
   }
 
-  .sv-submit {
-    padding: 14px;
-    font-size: 13px;
+  .sv-doc-actions {
+    flex-direction: column;
+  }
+
+  .sv-doc-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 10px;
   }
 }
