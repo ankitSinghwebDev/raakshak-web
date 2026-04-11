@@ -6,6 +6,7 @@ import { useAppContext } from '../../context/AppContext'
 import PasswordInput from '../ui/PasswordInput'
 import Spinner from '../ui/Spinner'
 import { createVaultSecrets, decryptVaultFile, encryptVaultFile, unlockVaultKey } from '../../utils/vaultCrypto'
+import { ocrImageForExpiry, OCR_ELIGIBLE_DOCS } from '../../utils/vaultOcr'
 import './SmartVaultModal.css'
 
 const DOCUMENT_TYPES = [
@@ -37,6 +38,26 @@ const sanitizeFileName = (name) => name.replace(/[^a-zA-Z0-9._-]/g, '_')
 
 const canPreviewFile = (contentType) => contentType === 'application/pdf' || String(contentType || '').startsWith('image/')
 
+const formatExpiryDate = (iso) => {
+  if (!iso) return null
+  const date = new Date(iso)
+  if (isNaN(date.getTime())) return null
+  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+const getExpiryStatus = (iso) => {
+  if (!iso) return null
+  const expiry = new Date(iso)
+  if (isNaN(expiry.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days = Math.floor((expiry - today) / (1000 * 60 * 60 * 24))
+  if (days < 0) return { label: 'Expired', className: 'sv-expiry-expired', days }
+  if (days <= 30) return { label: `Expires in ${days}d`, className: 'sv-expiry-soon', days }
+  if (days <= 90) return { label: `Expires in ${days}d`, className: 'sv-expiry-warning', days }
+  return { label: `Valid ${formatExpiryDate(iso)}`, className: 'sv-expiry-ok', days }
+}
+
 const SmartVaultModal = ({ open, onClose }) => {
   const { currentUser } = useAppContext()
   const [screen, setScreen] = useState('auth')
@@ -49,7 +70,7 @@ const SmartVaultModal = ({ open, onClose }) => {
   const [vaultMeta, setVaultMeta] = useState({ documents: {} })
   const [vaultKey, setVaultKey] = useState(null)
   const [uploadingDoc, setUploadingDoc] = useState('')
-  const [uploadProgress, setUploadProgress] = useState({ percent: 0, elapsed: 0 })
+  const [uploadProgress, setUploadProgress] = useState({ percent: 0, elapsed: 0, phase: '' })
   const [openingDoc, setOpeningDoc] = useState('')
   const [openElapsed, setOpenElapsed] = useState(0)
   const [preview, setPreview] = useState(null)
@@ -249,6 +270,11 @@ const SmartVaultModal = ({ open, onClose }) => {
     fileInputsRef.current[docKey]?.click()
   }
 
+  const triggerCameraCapture = (docKey) => {
+    if (!vaultKey || uploadingDoc) return
+    fileInputsRef.current[`${docKey}-camera`]?.click()
+  }
+
   const handleUploadDocument = async (docKey, file) => {
     if (!file || !currentUser?.key || !vaultKey) return
 
@@ -263,19 +289,36 @@ const SmartVaultModal = ({ open, onClose }) => {
     }
 
     setUploadingDoc(docKey)
-    setUploadProgress({ percent: 0, elapsed: 0 })
+    setUploadProgress({ percent: 0, elapsed: 0, phase: 'Preparing…' })
     const startTime = Date.now()
     const elapsedInterval = setInterval(() => {
       setUploadProgress((prev) => ({ ...prev, elapsed: Date.now() - startTime }))
     }, 100)
 
+    let extractedExpiry = null
     try {
       await ensureVaultAuth()
+
+      // Run OCR on images for eligible doc types (DL, PUC, Insurance)
+      if (OCR_ELIGIBLE_DOCS.has(docKey) && file.type.startsWith('image/')) {
+        setUploadProgress((prev) => ({ ...prev, phase: 'Scanning for expiry…', percent: 0 }))
+        try {
+          const ocrResult = await ocrImageForExpiry(file, (p) => {
+            setUploadProgress((prev) => ({ ...prev, percent: p }))
+          }, docKey)
+          extractedExpiry = ocrResult?.expiryDate || null
+        } catch (ocrErr) {
+          console.warn('OCR failed:', ocrErr)
+        }
+      }
+
+      setUploadProgress((prev) => ({ ...prev, phase: 'Encrypting…', percent: 0 }))
       const encryptedFile = await encryptVaultFile(file, vaultKey)
       const safeName = sanitizeFileName(file.name)
       const storagePath = `vault/${currentUser.key}/${docKey}/${Date.now()}-${safeName}.enc`
       const docStorageRef = storageRef(storage, storagePath)
 
+      setUploadProgress((prev) => ({ ...prev, phase: 'Uploading…', percent: 0 }))
       await new Promise((resolve, reject) => {
         const uploadTask = uploadBytesResumable(docStorageRef, encryptedFile.encryptedBytes, {
           contentType: 'application/octet-stream',
@@ -311,11 +354,16 @@ const SmartVaultModal = ({ open, onClose }) => {
           size: file.size,
           iv: encryptedFile.iv,
           uploadedAt: new Date().toISOString(),
+          expiryDate: extractedExpiry || null,
         },
       }
 
       await persistVaultMeta({ documents: nextDocuments })
-      toast.success('Document encrypted and uploaded.')
+      toast.success(
+        extractedExpiry
+          ? `Uploaded. Expiry detected: ${extractedExpiry}`
+          : 'Document encrypted and uploaded.'
+      )
     } catch (uploadError) {
       console.error('Vault upload error:', uploadError)
       const msg = uploadError?.code === 'storage/unauthorized'
@@ -325,7 +373,7 @@ const SmartVaultModal = ({ open, onClose }) => {
     } finally {
       clearInterval(elapsedInterval)
       setUploadingDoc('')
-      setUploadProgress({ percent: 0, elapsed: 0 })
+      setUploadProgress({ percent: 0, elapsed: 0, phase: '' })
     }
   }
 
@@ -493,24 +541,46 @@ const SmartVaultModal = ({ open, onClose }) => {
                 const currentDoc = documents[docType.key]
                 const isUploading = uploadingDoc === docType.key
                 const isOpening = openingDoc === docType.key
+                const expiryStatus = currentDoc?.expiryDate ? getExpiryStatus(currentDoc.expiryDate) : null
 
                 return (
                   <div key={docType.key} className="sv-doc-card">
-                    <div className="sv-doc-icon">{docType.icon}</div>
-                    <div className="sv-doc-info">
-                      <h4>{docType.title}</h4>
-                      <p className={`sv-doc-status ${currentDoc ? 'sv-doc-status-live' : ''}`}>
-                        {currentDoc ? `${formatFileSize(currentDoc.size)} • ${formatUploadTime(currentDoc.uploadedAt)}` : 'Not uploaded'}
-                      </p>
-                      <span className="sv-doc-file">
-                        {currentDoc ? currentDoc.fileName : 'PDF, JPG, PNG, WEBP up to 8 MB'}
-                      </span>
+                    <div className="sv-doc-head">
+                      <div className="sv-doc-icon">{docType.icon}</div>
+                      <div className="sv-doc-info">
+                        <div className="sv-doc-title-row">
+                          <h4>{docType.title}</h4>
+                          {expiryStatus && (
+                            <span className={`sv-expiry-badge ${expiryStatus.className}`}>
+                              {expiryStatus.label}
+                            </span>
+                          )}
+                        </div>
+                        <p className={`sv-doc-status ${currentDoc ? 'sv-doc-status-live' : ''}`}>
+                          {currentDoc ? `${formatFileSize(currentDoc.size)} • ${formatUploadTime(currentDoc.uploadedAt)}` : 'Not uploaded'}
+                        </p>
+                        <span className="sv-doc-file">
+                          {currentDoc ? currentDoc.fileName : 'PDF, JPG, PNG, WEBP up to 8 MB'}
+                        </span>
+                      </div>
                     </div>
 
                     <input
                       ref={(node) => { fileInputsRef.current[docType.key] = node }}
                       type="file"
                       accept=".pdf,image/jpeg,image/png,image/webp"
+                      className="sv-hidden-input"
+                      onChange={(e) => {
+                        const selectedFile = e.target.files?.[0]
+                        handleUploadDocument(docType.key, selectedFile)
+                        e.target.value = ''
+                      }}
+                    />
+                    <input
+                      ref={(node) => { fileInputsRef.current[`${docType.key}-camera`] = node }}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
                       className="sv-hidden-input"
                       onChange={(e) => {
                         const selectedFile = e.target.files?.[0]
@@ -528,6 +598,19 @@ const SmartVaultModal = ({ open, onClose }) => {
                         {isUploading ? '...' : currentDoc ? 'Replace' : 'Upload'}
                       </button>
 
+                      <button
+                        className="sv-doc-btn sv-doc-btn-icon sv-doc-btn-camera"
+                        onClick={() => triggerCameraCapture(docType.key)}
+                        disabled={isUploading || Boolean(uploadingDoc)}
+                        aria-label="Take photo"
+                        title="Take photo"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                          <circle cx="12" cy="13" r="4" />
+                        </svg>
+                      </button>
+
                       {currentDoc && (
                         <>
                           <button
@@ -538,9 +621,10 @@ const SmartVaultModal = ({ open, onClose }) => {
                             {isOpening ? '...' : canPreviewFile(currentDoc.contentType) ? 'View' : 'Open'}
                           </button>
                           <button
-                            className="sv-doc-btn sv-doc-btn-secondary"
+                            className="sv-doc-btn sv-doc-btn-icon"
                             onClick={() => handleOpenDocument(docType.key, 'download')}
                             disabled={isOpening}
+                            aria-label="Download"
                           >
                             ⬇
                           </button>
@@ -564,7 +648,7 @@ const SmartVaultModal = ({ open, onClose }) => {
           <div className="sv-loader-card">
             <div className="sv-loader-ring" />
             <p className="sv-loader-title">
-              {uploadingDoc ? 'Encrypting & uploading…' : 'Fetching & decrypting…'}
+              {uploadingDoc ? (uploadProgress.phase || 'Uploading…') : 'Fetching & decrypting…'}
             </p>
             {uploadingDoc && (
               <>
