@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
-import { generateQRCodeUrl, buildPublicSiteUrl } from '../../utils/helpers'
+import { generateQRCodeUrl, buildPublicSiteUrl, isPublicSiteUrlHealthy } from '../../utils/helpers'
 import { db, ref, onValue } from '../../config/firebase'
 import EmergencyModal from './EmergencyModal'
 import UpdateNumberModal from './UpdateNumberModal'
@@ -463,6 +463,11 @@ const UserDashboard = () => {
       {/* ===== QR STICKER (FASTag Style) ===== */}
       <section className="db-section">
         <h3 className="db-section-title">Your Rakshak QR Sticker</h3>
+        {!isPublicSiteUrlHealthy() && (
+          <div className="db-qr-warning">
+            ⚠️ QR codes point to <strong>{new URL(qrLink).origin}</strong> but this app is on <strong>{window.location.origin}</strong>. Scans will fail until that domain resolves here. Update <code>VITE_PUBLIC_SITE_URL</code> on Vercel or connect the custom domain.
+          </div>
+        )}
         <div className="db-sticker-layout">
           <div className="db-sticker-panel">
             <div className="db-sticker">

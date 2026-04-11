@@ -46,15 +46,36 @@ export const generateQRCodeUrl = (data, size = 200) => {
 
 export const getPublicSiteUrl = () => {
   const envUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.trim()
+
+  // If env URL is explicitly set, prefer it (production-stable QR URLs)
   if (envUrl) {
     return envUrl.replace(/\/+$/, '')
   }
 
+  // Otherwise, use the current origin (works anywhere the app is deployed)
   if (typeof window !== 'undefined') {
     return window.location.origin
   }
 
   return ''
+}
+
+/**
+ * Returns true if the configured public URL can be reached from the current
+ * window origin. When mismatched, QR codes will point to a different domain
+ * than the one the user is currently on — often the root cause of
+ * "scan works in dev but returns Page Not Found on prod".
+ */
+export const isPublicSiteUrlHealthy = () => {
+  if (typeof window === 'undefined') return true
+  const configured = import.meta.env.VITE_PUBLIC_SITE_URL?.trim()
+  if (!configured) return true // no env set, falls back to current origin
+  try {
+    const configuredOrigin = new URL(configured).origin
+    return configuredOrigin === window.location.origin
+  } catch {
+    return false
+  }
 }
 
 export const buildPublicSiteUrl = (path = '/', params = {}) => {
