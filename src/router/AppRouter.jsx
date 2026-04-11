@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext'
 import { Helmet } from 'react-helmet-async'
 import HomePage from '../pages/HomePage'
 import AboutPage from '../pages/AboutPage'
+import LegalPage from '../pages/LegalPage'
 import UserDashboard from '../components/Dashboard/UserDashboard'
 import ScannerPage from '../components/Scanner/ScannerPage'
 import AdminLayout from '../components/Admin/AdminLayout'
@@ -29,6 +30,8 @@ const AnimatedRoutes = () => {
       <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<LegalPage />} />
+        <Route path="/terms" element={<LegalPage />} />
         <Route path="/scan" element={
           <>
             <Helmet>

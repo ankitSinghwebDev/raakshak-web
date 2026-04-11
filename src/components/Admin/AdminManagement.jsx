@@ -8,7 +8,9 @@ import {
 import { Tag } from 'antd'
 import { db, ref, get, push, set, update } from '../../config/firebase'
 import { hashPassword } from '../../utils/hashPassword'
+import { evaluatePassword } from '../../utils/passwordRules'
 import PasswordInput from '../ui/PasswordInput'
+import PasswordStrengthHelper from '../ui/PasswordStrengthHelper'
 import { ListSkeleton } from './AdminSkeleton'
 
 const ROLE_HIERARCHY = { 'Super Admin': 4, 'Admin': 3, 'Support': 2, 'Viewer': 1 }
@@ -65,8 +67,9 @@ const AdminManagement = ({ currentAdmin }) => {
       toast.error('Fill all required fields')
       return
     }
-    if (newAdmin.password.length < 6) {
-      toast.error('Password must be at least 6 characters')
+    const pwCheck = evaluatePassword(newAdmin.password)
+    if (!pwCheck.valid) {
+      toast.error(`Password must have: ${pwCheck.missing.map((r) => r.label).join(', ')}`)
       return
     }
     const duplicate = admins.find((a) => a.empId?.toLowerCase() === newAdmin.empId.toLowerCase())
@@ -218,11 +221,12 @@ const AdminManagement = ({ currentAdmin }) => {
                 <label className="adm-form-label">Password</label>
                 <PasswordInput
                   className="adm-form-input"
-                  placeholder="Min 6 characters"
+                  placeholder="Strong password"
                   value={newAdmin.password}
                   onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
                   required
                 />
+                <PasswordStrengthHelper password={newAdmin.password} />
               </div>
               <div className="adm-form-field">
                 <label className="adm-form-label">Role</label>

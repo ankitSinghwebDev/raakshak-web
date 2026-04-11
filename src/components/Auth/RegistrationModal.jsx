@@ -409,8 +409,8 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
               required
             />
             <label htmlFor="tc-checkbox" className="tc-label">
-              I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> and{' '}
-              <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> of Rakshak.
+              I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> and{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> of Rakshak.
             </label>
           </div>
 

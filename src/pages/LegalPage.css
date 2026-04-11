@@ -1,0 +1,140 @@
+.legal-page {
+  background: #0a0a0a;
+  color: #fff;
+  min-height: 100vh;
+  padding: 60px 20px 80px;
+}
+
+.legal-container {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.legal-back {
+  display: inline-block;
+  color: #F28C38;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  text-decoration: none;
+  margin-bottom: 30px;
+  padding: 8px 16px;
+  border: 1px solid rgba(242, 140, 56, 0.35);
+  border-radius: 30px;
+  background: rgba(242, 140, 56, 0.08);
+  transition: all 0.2s;
+}
+
+.legal-back:hover {
+  background: rgba(242, 140, 56, 0.16);
+  border-color: #F28C38;
+  transform: translateY(-1px);
+}
+
+.legal-title {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.1;
+}
+
+.legal-meta {
+  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.legal-intro {
+  background: rgba(242, 140, 56, 0.06);
+  border: 1px solid rgba(242, 140, 56, 0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: #F28C38;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.legal-section {
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.legal-section:last-of-type {
+  border-bottom: none;
+}
+
+.legal-section h2 {
+  color: #F28C38;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.legal-section p {
+  color: #b8b8b8;
+  font-size: 14px;
+  line-height: 1.8;
+  font-weight: 500;
+}
+
+.legal-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.legal-switch {
+  color: #F28C38;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+  padding: 12px 28px;
+  border: 1px solid rgba(242, 140, 56, 0.35);
+  border-radius: 30px;
+  background: rgba(242, 140, 56, 0.08);
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.legal-switch:hover {
+  background: rgba(242, 140, 56, 0.16);
+  border-color: #F28C38;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .legal-page {
+    padding: 30px 16px 60px;
+  }
+
+  .legal-title {
+    font-size: 28px;
+    letter-spacing: -0.8px;
+  }
+
+  .legal-section h2 {
+    font-size: 15px;
+  }
+
+  .legal-section p {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .legal-intro {
+    font-size: 12px;
+  }
+}

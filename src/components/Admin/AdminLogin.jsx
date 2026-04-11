@@ -4,7 +4,9 @@ import toast from 'react-hot-toast'
 import { LockOutlined, IdcardOutlined, LoadingOutlined, HomeOutlined, MailOutlined, ArrowLeftOutlined, CloseOutlined } from '@ant-design/icons'
 import { db, ref, get, functions, httpsCallable } from '../../config/firebase'
 import { verifyPassword, hashPassword } from '../../utils/hashPassword'
+import { evaluatePassword } from '../../utils/passwordRules'
 import PasswordInput from '../ui/PasswordInput'
+import PasswordStrengthHelper from '../ui/PasswordStrengthHelper'
 import logoImg from '../../assets/icons/Rakshak.jpg'
 import './Admin.css'
 
@@ -105,7 +107,11 @@ const AdminLogin = ({ onLogin }) => {
   // ===== RESET PASSWORD =====
   const handleResetPassword = async (e) => {
     e.preventDefault()
-    if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return }
+    const pwCheck = evaluatePassword(newPassword)
+    if (!pwCheck.valid) {
+      toast.error(`Password must have: ${pwCheck.missing.map((r) => r.label).join(', ')}`)
+      return
+    }
     if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return }
     setFpLoading(true)
 
@@ -237,7 +243,8 @@ const AdminLogin = ({ onLogin }) => {
             <form onSubmit={handleResetPassword}>
               <div className="adm-field">
                 <label><LockOutlined /> NEW PASSWORD</label>
-                <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Min 6 characters" required />
+                <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Strong password" required />
+                <PasswordStrengthHelper password={newPassword} />
               </div>
               <div className="adm-field">
                 <label><LockOutlined /> CONFIRM PASSWORD</label>

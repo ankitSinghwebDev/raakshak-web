@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Card, Row, Col, Tag, Table, Statistic, Divider, Typography } from 'antd'
+import toast from 'react-hot-toast'
+import { Card, Row, Col, Tag, Table, Statistic, Divider, Typography, Input, Button } from 'antd'
 import {
   WalletOutlined, DollarOutlined, CalendarOutlined,
-  BankOutlined, PercentageOutlined,
+  BankOutlined, PercentageOutlined, MinusCircleOutlined, EditOutlined,
 } from '@ant-design/icons'
-import { db, ref, get } from '../../config/firebase'
+import { db, ref, get, set } from '../../config/firebase'
 import { DashboardSkeleton } from './AdminSkeleton'
 
 const { Text } = Typography
@@ -12,22 +13,48 @@ const { Text } = Typography
 const FinancePanel = () => {
   const [customers, setCustomers] = useState([])
   const [partners, setPartners] = useState([])
+  const [expenses, setExpenses] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [editingExpense, setEditingExpense] = useState(false)
+  const [expenseDraft, setExpenseDraft] = useState('')
+  const [savingExpense, setSavingExpense] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const [custSnap, partnerSnap] = await Promise.all([
+        const [custSnap, partnerSnap, expSnap] = await Promise.all([
           get(ref(db, 'customers')),
           get(ref(db, 'partners')),
+          get(ref(db, 'finance/expenses')),
         ])
         if (custSnap.exists()) setCustomers(Object.entries(custSnap.val()).map(([k, v]) => ({ key: k, ...v })))
         if (partnerSnap.exists()) setPartners(Object.entries(partnerSnap.val()).map(([k, v]) => ({ key: k, ...v })))
+        if (expSnap.exists()) setExpenses(Number(expSnap.val()) || 0)
       } catch (err) { console.error(err) }
       finally { setLoading(false) }
     }
     fetch()
   }, [])
+
+  const handleSaveExpense = async () => {
+    const value = Number(expenseDraft)
+    if (Number.isNaN(value) || value < 0) {
+      toast.error('Enter a valid non-negative amount')
+      return
+    }
+    setSavingExpense(true)
+    try {
+      await set(ref(db, 'finance/expenses'), value)
+      setExpenses(value)
+      setEditingExpense(false)
+      toast.success('Expenses updated')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to update expenses')
+    } finally {
+      setSavingExpense(false)
+    }
+  }
 
   const data = useMemo(() => {
     const today = new Date().toISOString().split('T')[0]
@@ -53,7 +80,9 @@ const FinancePanel = () => {
 
     const totalPendingComm = partners.reduce((s, p) => s + (p.pendingComm || 0), 0)
     const totalPaidComm = partners.reduce((s, p) => s + ((p.totalRevenue || 0) * (p.comm || 0) / 100), 0)
-    const netRevenue = totalRev - totalPendingComm
+    const totalCommissions = totalPendingComm + totalPaidComm
+    // Net Revenue = Total Revenue - Expenses - All Commissions (paid + pending)
+    const netRevenue = totalRev - expenses - totalCommissions
 
     const last6Months = []
     for (let i = 5; i >= 0; i--) {
@@ -80,17 +109,17 @@ const FinancePanel = () => {
 
     return {
       totalRev, todayRev, monthRev, netRevenue,
-      totalPendingComm, totalPaidComm, planRevMap,
+      totalPendingComm, totalPaidComm, totalCommissions, planRevMap,
       last6Months, maxMonthRev, transactions,
     }
-  }, [customers, partners])
+  }, [customers, partners, expenses])
 
   if (loading) return <DashboardSkeleton />
 
   return (
     <div className="adm-dashboard">
       {/* KPIs */}
-      <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
+      <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
         <Col xs={12} sm={6}>
           <Card size="small" className="adm-kpi-card">
             <Statistic title="Total Revenue" value={data.totalRev} prefix={<DollarOutlined />} formatter={(v) => `₹${Number(v).toLocaleString()}`} />
@@ -98,7 +127,54 @@ const FinancePanel = () => {
         </Col>
         <Col xs={12} sm={6}>
           <Card size="small" className="adm-kpi-card">
-            <Statistic title="Today Revenue" value={data.todayRev} prefix="₹" formatter={(v) => Number(v).toLocaleString()} />
+            {editingExpense ? (
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 6, fontWeight: 700 }}>TOTAL EXPENSES</div>
+                <Input
+                  type="number"
+                  size="small"
+                  autoFocus
+                  prefix="₹"
+                  value={expenseDraft}
+                  onChange={(e) => setExpenseDraft(e.target.value)}
+                  onPressEnter={handleSaveExpense}
+                  placeholder="0"
+                />
+                <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+                  <Button size="small" type="primary" loading={savingExpense} onClick={handleSaveExpense}>Save</Button>
+                  <Button size="small" onClick={() => setEditingExpense(false)}>Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <Statistic
+                  title="Total Expenses"
+                  value={expenses}
+                  prefix={<MinusCircleOutlined />}
+                  formatter={(v) => `₹${Number(v).toLocaleString()}`}
+                  valueStyle={{ color: 'var(--red, #ff6b6b)' }}
+                />
+                <EditOutlined
+                  onClick={() => { setExpenseDraft(String(expenses)); setEditingExpense(true) }}
+                  style={{ position: 'absolute', top: 0, right: 0, cursor: 'pointer', color: 'var(--text-dim)', fontSize: 14 }}
+                  title="Edit expenses"
+                />
+              </div>
+            )}
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card size="small" className="adm-kpi-card">
+            <Statistic
+              title="Total Commissions"
+              value={data.totalCommissions}
+              prefix={<PercentageOutlined />}
+              formatter={(v) => `₹${Number(v).toLocaleString()}`}
+              valueStyle={{ color: 'var(--accent)' }}
+            />
+            <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 4 }}>
+              Paid ₹{data.totalPaidComm.toLocaleString()} · Pending ₹{data.totalPendingComm.toLocaleString()}
+            </div>
           </Card>
         </Col>
         <Col xs={12} sm={6}>
@@ -106,14 +182,23 @@ const FinancePanel = () => {
             <Statistic title="Net Revenue" value={data.netRevenue} prefix={<BankOutlined />} formatter={(v) => `₹${Number(v).toLocaleString()}`}
               valueStyle={{ color: data.netRevenue >= 0 ? 'var(--green)' : 'var(--red)' }}
             />
+            <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 4 }}>
+              Revenue − Expenses − Commissions
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Secondary stats */}
+      <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
+        <Col xs={12} sm={6}>
+          <Card size="small" className="adm-kpi-card">
+            <Statistic title="Today Revenue" value={data.todayRev} prefix="₹" formatter={(v) => Number(v).toLocaleString()} />
           </Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card size="small" className="adm-kpi-card">
-            <Statistic title="Pending Commissions" value={data.totalPendingComm} prefix={<PercentageOutlined />}
-              formatter={(v) => `₹${Number(v).toLocaleString()}`}
-              valueStyle={{ color: data.totalPendingComm > 0 ? 'var(--accent)' : 'var(--green)' }}
-            />
+            <Statistic title="This Month" value={data.monthRev} prefix="₹" formatter={(v) => Number(v).toLocaleString()} />
           </Card>
         </Col>
       </Row>
