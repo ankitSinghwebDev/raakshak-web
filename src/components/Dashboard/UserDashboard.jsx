@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
@@ -17,12 +17,132 @@ const isPremiumUser = (plan) => {
   return plan === 'Premium Studio' || plan === 'Custom QR'
 }
 
+const EXPIRY_DOCUMENT_TYPES = [
+  { key: 'insurance', title: 'Insurance Policy', shortTitle: 'Insurance', icon: '📋' },
+  { key: 'puc', title: 'PUC Certificate', shortTitle: 'PUC', icon: '🌿' },
+  { key: 'dl', title: 'Driving License', shortTitle: 'DL', icon: '🪪' },
+  { key: 'rc', title: 'Registration Certificate', shortTitle: 'RC', icon: '📄' },
+]
+
+const DAY_MS = 1000 * 60 * 60 * 24
+
+const formatExpiryDate = (iso) => {
+  if (!iso) return '—'
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+const formatUploadDate = (timestamp) => {
+  if (!timestamp) return 'Recently uploaded'
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) return 'Recently uploaded'
+  return `Uploaded ${date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })}`
+}
+
+const pluralize = (count, singular, plural = `${singular}s`) => {
+  return `${count} ${count === 1 ? singular : plural}`
+}
+
+const getExpiryInsight = (doc) => {
+  if (!doc) {
+    return {
+      tone: 'missing',
+      days: null,
+      sortOrder: 4,
+      statusLabel: 'Missing',
+      statusShortLabel: 'Upload Needed',
+      detail: 'Upload this document to start expiry reminders.',
+    }
+  }
+
+  if (!doc.expiryDate) {
+    return {
+      tone: 'review',
+      days: null,
+      sortOrder: 3,
+      statusLabel: 'Needs Review',
+      statusShortLabel: 'Review',
+      detail: 'Expiry date was not detected. Upload a clearer image or update the file.',
+    }
+  }
+
+  const expiryDate = new Date(doc.expiryDate)
+  if (Number.isNaN(expiryDate.getTime())) {
+    return {
+      tone: 'review',
+      days: null,
+      sortOrder: 3,
+      statusLabel: 'Needs Review',
+      statusShortLabel: 'Review',
+      detail: 'Saved expiry date looks invalid. Replace the document to refresh it.',
+    }
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  expiryDate.setHours(0, 0, 0, 0)
+
+  const days = Math.floor((expiryDate - today) / DAY_MS)
+
+  if (days < 0) {
+    return {
+      tone: 'expired',
+      days,
+      sortOrder: 0,
+      statusLabel: `Expired ${Math.abs(days)}d ago`,
+      statusShortLabel: 'Expired',
+      detail: `Expired on ${formatExpiryDate(doc.expiryDate)}.`,
+    }
+  }
+
+  if (days <= 30) {
+    return {
+      tone: 'soon',
+      days,
+      sortOrder: 1,
+      statusLabel: `Expires in ${days}d`,
+      statusShortLabel: 'Due Soon',
+      detail: `Expires on ${formatExpiryDate(doc.expiryDate)}.`,
+    }
+  }
+
+  if (days <= 90) {
+    return {
+      tone: 'warning',
+      days,
+      sortOrder: 2,
+      statusLabel: `Due in ${days}d`,
+      statusShortLabel: 'Upcoming',
+      detail: `Expires on ${formatExpiryDate(doc.expiryDate)}.`,
+    }
+  }
+
+  return {
+    tone: 'safe',
+    days,
+    sortOrder: 5,
+    statusLabel: `Valid till ${formatExpiryDate(doc.expiryDate)}`,
+    statusShortLabel: 'Valid',
+    detail: `Valid till ${formatExpiryDate(doc.expiryDate)}.`,
+  }
+}
+
 const UserDashboard = () => {
   const { currentUser, logoutUser } = useAppContext()
   const navigate = useNavigate()
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [updateNumOpen, setUpdateNumOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [expiryOpen, setExpiryOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vehicleDetailsOpen, setVehicleDetailsOpen] = useState(false)
   const [myVehiclesOpen, setMyVehiclesOpen] = useState(false)
@@ -34,6 +154,7 @@ const UserDashboard = () => {
   usePushNotifications(currentUser)
   const [recentScans, setRecentScans] = useState([])
   const [totalScans, setTotalScans] = useState(0)
+  const [vaultDocuments, setVaultDocuments] = useState({})
 
   const handleLogout = useCallback(() => {
     logoutUser()
@@ -54,7 +175,7 @@ const UserDashboard = () => {
     if (!currentUser?.key) return
 
     const scansRef = ref(db, `scans/${currentUser.key}`)
-    const unsubscribe = onValue(scansRef, (snap) => {
+    const unsubscribeScans = onValue(scansRef, (snap) => {
       if (snap.exists()) {
         const data = snap.val()
         const scanList = Object.values(data)
@@ -75,11 +196,26 @@ const UserDashboard = () => {
     })
 
     const customerRef = ref(db, `customers/${currentUser.key}/totalScans`)
-    onValue(customerRef, (snap) => {
+    const unsubscribeCustomer = onValue(customerRef, (snap) => {
       if (snap.exists()) setTotalScans((prev) => Math.max(prev, snap.val()))
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribeScans()
+      unsubscribeCustomer()
+    }
+  }, [currentUser?.key])
+
+  useEffect(() => {
+    if (!currentUser?.key) return
+
+    const vaultRef = ref(db, `customers/${currentUser.key}/vault`)
+    const unsubscribeVault = onValue(vaultRef, (snap) => {
+      const vault = snap.exists() ? snap.val() : null
+      setVaultDocuments(vault?.documents || {})
+    })
+
+    return () => unsubscribeVault()
   }, [currentUser?.key])
 
   const triggerNotification = (scan) => {
@@ -96,7 +232,7 @@ const UserDashboard = () => {
     // Browser push notification (works in background tabs)
     if ('Notification' in window && Notification.permission === 'granted') {
       const typeEmoji = scan.type === 'emergency' ? '🚨' : scan.type === 'urgent' ? '⚠️' : '🅿️'
-      new Notification(`${typeEmoji} Rakshak Alert — ${currentUser.vehicle}`, {
+      new Notification(`${typeEmoji} Rakshak Alert — ${currentUser?.vehicle || 'Vehicle'}`, {
         body: scan.message,
         icon: 'https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png',
         tag: 'rakshak-scan',
@@ -106,9 +242,7 @@ const UserDashboard = () => {
     }
   }
 
-  if (!currentUser) return null
-
-  const isProUser = isPremiumUser(currentUser.plan)
+  const isProUser = isPremiumUser(currentUser?.plan)
 
   const handleToolClick = () => {
     if (!isProUser) {
@@ -116,7 +250,20 @@ const UserDashboard = () => {
     }
   }
 
-  const qrLink = buildPublicSiteUrl('/scan', { id: currentUser.generatedId })
+  const handleExpiryToolClick = () => {
+    if (!isProUser) {
+      setUpgradeOpen(true)
+      return
+    }
+    setExpiryOpen(true)
+  }
+
+  const handleOpenVaultFromExpiry = () => {
+    setExpiryOpen(false)
+    setVaultOpen(true)
+  }
+
+  const qrLink = buildPublicSiteUrl('/scan', { id: currentUser?.generatedId })
   const qrUrl = generateQRCodeUrl(qrLink, 200)
   const qrUrlHD = generateQRCodeUrl(qrLink, 600) // High-res for print/download
 
@@ -127,7 +274,7 @@ const UserDashboard = () => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `Rakshak-${currentUser.vehicle}-QR.png`
+      a.download = `Rakshak-${currentUser?.vehicle || 'Vehicle'}-QR.png`
       a.click()
       URL.revokeObjectURL(url)
     } catch {
@@ -140,7 +287,7 @@ const UserDashboard = () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Rakshak QR - ${currentUser.vehicle}</title>
+          <title>Rakshak QR - ${currentUser?.vehicle || 'Vehicle'}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f5f5f5; font-family: -apple-system, sans-serif; }
@@ -197,7 +344,7 @@ const UserDashboard = () => {
               </div>
             </div>
             <div class="vehicle-bar">
-              <span>${currentUser.vehicle}</span>
+              <span>${currentUser?.vehicle || 'Vehicle'}</span>
             </div>
           </div>
           <script>
@@ -213,9 +360,151 @@ const UserDashboard = () => {
     printWindow.document.close()
   }
 
-  const regDate = currentUser.timestamp
+  const regDate = currentUser?.timestamp
     ? new Date(currentUser.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—'
+
+  const expiryItems = useMemo(() => {
+    return EXPIRY_DOCUMENT_TYPES
+      .map((docType) => {
+        const doc = vaultDocuments?.[docType.key] || null
+        const insight = getExpiryInsight(doc)
+
+        return {
+          ...docType,
+          ...insight,
+          doc,
+          expiryDate: doc?.expiryDate || null,
+          fileName: doc?.fileName || null,
+          uploadedLabel: formatUploadDate(doc?.uploadedAt),
+        }
+      })
+      .sort((a, b) => {
+        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
+        if (a.days === null && b.days === null) return a.title.localeCompare(b.title)
+        if (a.days === null) return 1
+        if (b.days === null) return -1
+        return a.days - b.days
+      })
+  }, [vaultDocuments])
+
+  const expiredItems = expiryItems.filter((item) => item.tone === 'expired')
+  const soonItems = expiryItems.filter((item) => item.tone === 'soon')
+  const warningItems = expiryItems.filter((item) => item.tone === 'warning')
+  const reviewItems = expiryItems.filter((item) => item.tone === 'review')
+  const safeItems = expiryItems.filter((item) => item.tone === 'safe')
+  const missingItems = expiryItems.filter((item) => item.tone === 'missing')
+  const trackedItems = expiryItems.filter((item) => item.expiryDate && item.days !== null)
+
+  const expiryCard = useMemo(() => {
+    if (expiredItems.length > 0) {
+      return {
+        badgeLabel: 'EXPIRED',
+        badgeTone: 'expired',
+        summary: `${expiredItems[0].shortTitle} expired ${Math.abs(expiredItems[0].days)}d ago`,
+        meta: `${pluralize(expiredItems.length, 'document')} needs renewal now`,
+      }
+    }
+
+    if (soonItems.length > 0) {
+      return {
+        badgeLabel: 'DUE SOON',
+        badgeTone: 'soon',
+        summary: `${soonItems[0].shortTitle} expires in ${soonItems[0].days}d`,
+        meta: `${pluralize(soonItems.length, 'document')} due in the next 30 days`,
+      }
+    }
+
+    if (warningItems.length > 0) {
+      return {
+        badgeLabel: 'UPCOMING',
+        badgeTone: 'warning',
+        summary: `${warningItems[0].shortTitle} due on ${formatExpiryDate(warningItems[0].expiryDate)}`,
+        meta: `${pluralize(warningItems.length, 'document')} due within 90 days`,
+      }
+    }
+
+    if (reviewItems.length > 0) {
+      return {
+        badgeLabel: 'REVIEW',
+        badgeTone: 'review',
+        summary: `${pluralize(reviewItems.length, 'upload')} need expiry review`,
+        meta: 'Expiry date was not detected from one or more documents',
+      }
+    }
+
+    if (trackedItems.length > 0) {
+      return {
+        badgeLabel: 'ALL CLEAR',
+        badgeTone: 'safe',
+        summary: 'All tracked documents are valid',
+        meta: `${pluralize(safeItems.length, 'document')} covered${missingItems.length > 0 ? ` • ${pluralize(missingItems.length, 'missing document')}` : ''}`,
+      }
+    }
+
+    return {
+      badgeLabel: 'SETUP',
+      badgeTone: 'setup',
+      summary: 'Add documents to start reminders',
+      meta: 'Upload Insurance, PUC, DL or RC in Smart Vault',
+    }
+  }, [expiredItems, soonItems, warningItems, reviewItems, trackedItems, safeItems.length, missingItems.length])
+
+  const expiryNotification = useMemo(() => {
+    if (expiredItems.length > 0) {
+      return {
+        signature: expiredItems.map((item) => `${item.key}:${item.days}`).join('|'),
+        title: `Rakshak Expiry Alert — ${currentUser?.vehicle || 'Vehicle'}`,
+        body: `${pluralize(expiredItems.length, 'document')} expired. Open Smart Vault to renew ${expiredItems.length === 1 ? 'it' : 'them'}.`,
+        icon: '🚨',
+      }
+    }
+
+    if (soonItems.length > 0) {
+      return {
+        signature: soonItems.map((item) => `${item.key}:${item.days}`).join('|'),
+        title: `Rakshak Expiry Alert — ${currentUser?.vehicle || 'Vehicle'}`,
+        body: `${soonItems[0].shortTitle} expires in ${soonItems[0].days} day${soonItems[0].days === 1 ? '' : 's'}. Review your documents in Smart Vault.`,
+        icon: '📅',
+      }
+    }
+
+    return null
+  }, [currentUser?.vehicle, expiredItems, soonItems])
+
+  useEffect(() => {
+    if (!currentUser?.key || !expiryNotification) return
+
+    const storageKey = `rakshak-expiry-alert:${currentUser.key}`
+    let alreadyNotified = false
+
+    try {
+      alreadyNotified = window.localStorage.getItem(storageKey) === expiryNotification.signature
+      if (!alreadyNotified) {
+        window.localStorage.setItem(storageKey, expiryNotification.signature)
+      }
+    } catch {
+      alreadyNotified = false
+    }
+
+    if (alreadyNotified) return
+
+    toast(expiryNotification.body, {
+      duration: 5000,
+      icon: expiryNotification.icon,
+    })
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(expiryNotification.title, {
+        body: expiryNotification.body,
+        icon: 'https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png',
+        tag: `rakshak-expiry-${currentUser.key}`,
+        renotify: true,
+      })
+    }
+  }, [currentUser?.key, expiryNotification])
+
+  if (!currentUser) return null
 
   return (
     <div className="db">
@@ -433,13 +722,24 @@ const UserDashboard = () => {
               {isProUser ? 'LIVE' : 'LOCKED 🔒'}
             </span>
           </div>
-          <div className={`db-tool ${!isProUser ? 'db-tool--locked' : ''}`} onClick={handleToolClick}>
+          <div
+            className={`db-tool db-tool--expiry ${!isProUser ? 'db-tool--locked' : ''}`}
+            onClick={handleExpiryToolClick}
+          >
             {isProUser && <div className="db-tool-glow" />}
             <div className="db-tool-emoji">📅</div>
             <h4>Expiry Alerts</h4>
-            <span className={`db-tool-badge ${isProUser ? 'live' : 'locked'}`}>
-              {isProUser ? 'LIVE' : 'LOCKED 🔒'}
-            </span>
+            {isProUser ? (
+              <>
+                <p className="db-tool-copy">{expiryCard.summary}</p>
+                <p className="db-tool-subcopy">{expiryCard.meta}</p>
+                <span className={`db-tool-badge db-tool-badge--${expiryCard.badgeTone}`}>
+                  {expiryCard.badgeLabel}
+                </span>
+              </>
+            ) : (
+              <span className="db-tool-badge locked">LOCKED 🔒</span>
+            )}
           </div>
           <div className={`db-tool ${!isProUser ? 'db-tool--locked' : ''}`} onClick={handleToolClick}>
             {isProUser && <div className="db-tool-glow" />}
@@ -570,6 +870,75 @@ const UserDashboard = () => {
       <footer className="db-footer">
         &copy; 2026 Abhishek Technology India Private Limited. All Rights Reserved.
       </footer>
+
+      {expiryOpen && (
+        <div className="modal-overlay" onClick={() => setExpiryOpen(false)}>
+          <div className="modal-content db-expiry-modal" onClick={(e) => e.stopPropagation()}>
+            <span className="close-btn" onClick={() => setExpiryOpen(false)}>&times;</span>
+
+            <div className="db-expiry-head">
+              <div>
+                <span className={`db-expiry-pill db-expiry-pill--${expiryCard.badgeTone}`}>
+                  {expiryCard.badgeLabel}
+                </span>
+                <h2>Expiry Alerts</h2>
+                <p>{expiryCard.summary}. {expiryCard.meta}.</p>
+              </div>
+              <button className="db-expiry-primary" onClick={handleOpenVaultFromExpiry}>
+                Open Smart Vault
+              </button>
+            </div>
+
+            <div className="db-expiry-summary">
+              <div className="db-expiry-summary-card">
+                <strong>{expiredItems.length}</strong>
+                <span>Expired</span>
+              </div>
+              <div className="db-expiry-summary-card">
+                <strong>{soonItems.length + warningItems.length}</strong>
+                <span>Upcoming</span>
+              </div>
+              <div className="db-expiry-summary-card">
+                <strong>{reviewItems.length}</strong>
+                <span>Need Review</span>
+              </div>
+              <div className="db-expiry-summary-card">
+                <strong>{missingItems.length}</strong>
+                <span>Missing</span>
+              </div>
+            </div>
+
+            <div className="db-expiry-list">
+              {expiryItems.map((item) => (
+                <div key={item.key} className={`db-expiry-item db-expiry-item--${item.tone}`}>
+                  <div className="db-expiry-item-icon">{item.icon}</div>
+                  <div className="db-expiry-item-copy">
+                    <div className="db-expiry-item-head">
+                      <h4>{item.title}</h4>
+                      <span className={`db-expiry-tag db-expiry-tag--${item.tone}`}>
+                        {item.statusShortLabel}
+                      </span>
+                    </div>
+                    <p>{item.detail}</p>
+                    <span className="db-expiry-file">
+                      {item.fileName ? `${item.fileName} • ${item.uploadedLabel}` : 'Not uploaded yet'}
+                    </span>
+                  </div>
+                  <button className="db-expiry-link" onClick={handleOpenVaultFromExpiry}>
+                    {item.doc ? 'Manage' : 'Upload'}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {notifPermission !== 'granted' && (
+              <div className="db-expiry-note">
+                Enable browser notifications to receive expiry reminders on this device.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <EmergencyModal open={emergencyOpen} onClose={() => setEmergencyOpen(false)} />
       <UpdateNumberModal open={updateNumOpen} onClose={() => setUpdateNumOpen(false)} />

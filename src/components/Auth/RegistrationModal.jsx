@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { RAZORPAY_KEY, TAG_PRICES, COMPARISON_TABLE } from '../../utils/constants'
 import { validateMobileNumber, generateQRCodeUrl, buildPublicSiteUrl } from '../../utils/helpers'
@@ -15,6 +15,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
   const [couponCode, setCouponCode] = useState('')
   const [couponMsg, setCouponMsg] = useState({ text: '', type: '' })
   const [isCouponApplied, setIsCouponApplied] = useState(false)
+  const [appliedCouponMeta, setAppliedCouponMeta] = useState(null)
   const [isCustomQR, setIsCustomQR] = useState(false)
   const [tcChecked, setTcChecked] = useState(false)
   const [mobileError, setMobileError] = useState(false)
@@ -31,6 +32,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
     setCouponCode('')
     setCouponMsg({ text: '', type: '' })
     setIsCouponApplied(false)
+    setAppliedCouponMeta(null)
     setIsCustomQR(false)
     setTcChecked(false)
     setMobileError(false)
@@ -43,22 +45,91 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
     onClose()
   }, [resetForm, onClose])
 
-  const handleApplyCoupon = useCallback(() => {
-    const code = couponCode.trim().toUpperCase()
+  const getUrlReferralCode = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    const isDealer = urlParams.get('ref')
+    return (urlParams.get('ref') || urlParams.get('coupon') || '').trim().toUpperCase()
+  }, [])
+
+  const handleApplyCoupon = useCallback(async (overrideCode = '') => {
+    const code = (overrideCode || couponCode).trim().toUpperCase()
+    const urlCode = getUrlReferralCode()
+
+    if (!code) {
+      setIsCouponApplied(false)
+      setAppliedCouponMeta(null)
+      setCouponMsg({ text: '❌ Enter a valid code first.', type: 'error' })
+      return
+    }
 
     if (code === 'WTRAK01') {
       setIsCouponApplied(true)
-      setCouponMsg({ text: '🎉 Wow! Coupon Applied. Welcome to Rakshak Family!', type: 'success' })
-    } else if (isDealer && code === isDealer.toUpperCase()) {
-      setIsCouponApplied(true)
-      setCouponMsg({ text: '', type: '' })
-    } else {
-      setIsCouponApplied(false)
-      setCouponMsg({ text: '❌ Invalid Code! Please enter valid Code.', type: 'error' })
+      setAppliedCouponMeta({
+        source: 'team_code',
+        entry: urlCode === code ? 'qr_link' : 'manual_code',
+        partnerKey: null,
+        partnerCode: null,
+        partnerName: null,
+        partnerShop: null,
+        partnerComm: 0,
+      })
+      setCouponMsg({ text: '🎉 Team code applied successfully!', type: 'success' })
+      return
     }
-  }, [couponCode])
+
+    try {
+      const partnersRef = ref(db, 'partners')
+      const partnerQuery = query(partnersRef, orderByChild('code'), equalTo(code))
+      const partnerSnap = await get(partnerQuery)
+
+      if (!partnerSnap.exists()) {
+        setIsCouponApplied(false)
+        setAppliedCouponMeta(null)
+        setCouponMsg({ text: '❌ Invalid partner code. Please enter a valid dealer ID.', type: 'error' })
+        return
+      }
+
+      const partnerKey = Object.keys(partnerSnap.val())[0]
+      const partnerData = Object.values(partnerSnap.val())[0]
+      if ((partnerData.status || 'active') === 'inactive') {
+        setIsCouponApplied(false)
+        setAppliedCouponMeta(null)
+        setCouponMsg({ text: '❌ This partner code is inactive right now.', type: 'error' })
+        return
+      }
+
+      const fromPartnerQr = Boolean(urlCode) && urlCode === code
+      setIsCouponApplied(true)
+      setAppliedCouponMeta({
+        source: fromPartnerQr ? 'partner_qr' : 'partner_code',
+        entry: fromPartnerQr ? 'qr_link' : 'manual_code',
+        partnerKey,
+        partnerCode: code,
+        partnerName: partnerData.name || '',
+        partnerShop: partnerData.shop || '',
+        partnerComm: Number(partnerData.comm) || 0,
+        urlCode: urlCode || null,
+      })
+      setCouponMsg({
+        text: fromPartnerQr
+          ? `🎉 ${partnerData.shop || partnerData.name} referral linked successfully!`
+          : `🎉 Partner code applied for ${partnerData.shop || partnerData.name}!`,
+        type: 'success',
+      })
+    } catch (err) {
+      console.error('Coupon validation error:', err)
+      setIsCouponApplied(false)
+      setAppliedCouponMeta(null)
+      setCouponMsg({ text: '❌ Unable to verify code right now. Please try again.', type: 'error' })
+    }
+  }, [couponCode, getUrlReferralCode])
+
+  useEffect(() => {
+    if (!open) return
+    const urlCode = getUrlReferralCode()
+    if (!urlCode) return
+    setCouponCode(urlCode)
+    handleApplyCoupon(urlCode)
+  }, [open, getUrlReferralCode])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -90,6 +161,7 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
       const newCustomerRef = push(customersRef)
 
       const qrLink = buildPublicSiteUrl('/scan', { id: generatedID })
+      const urlReferralCode = getUrlReferralCode()
 
       const formData = {
         generatedId: generatedID,
@@ -101,6 +173,13 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
         amount: activePrice,
         paymentId: paymentId,
         coupon: appliedCoupon,
+        partnerCode: appliedCouponMeta?.partnerCode || null,
+        partnerKey: appliedCouponMeta?.partnerKey || null,
+        referredByName: appliedCouponMeta?.partnerName || null,
+        referredByShop: appliedCouponMeta?.partnerShop || null,
+        registrationSource: appliedCouponMeta?.source || (appliedCoupon === 'WTRAK01' ? 'team_code' : 'partner_code'),
+        registrationEntry: appliedCouponMeta?.entry || 'manual_code',
+        referralUrlCode: urlReferralCode || null,
         status: 'Paid',
         qrLink: qrLink,
         timestamp: new Date().toISOString(),
@@ -126,18 +205,11 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
           const { generatedID, qrLink } = await saveToFirebase(response.razorpay_payment_id)
 
           // Partner stats auto-update
-          const partnersRef = ref(db, 'partners')
-          const partnerQuery = query(partnersRef, orderByChild('code'), equalTo(appliedCoupon))
-          const partnerSnap = await get(partnerQuery)
-
-          if (partnerSnap.exists()) {
-            const partnerKey = Object.keys(partnerSnap.val())[0]
-            const partnerData = Object.values(partnerSnap.val())[0]
-            const partnerComm = parseFloat(partnerData.comm) || 0
-            await update(ref(db, `partners/${partnerKey}`), {
+          if (appliedCouponMeta?.partnerKey) {
+            await update(ref(db, `partners/${appliedCouponMeta.partnerKey}`), {
               totalSales: increment(1),
               totalRevenue: increment(activePrice),
-              pendingComm: increment(partnerComm),
+              pendingComm: increment(appliedCouponMeta.partnerComm || 0),
             })
           }
 
@@ -252,11 +324,16 @@ const RegistrationModal = ({ open, onClose, onSuccess, onOpenStudio }) => {
                 type="text"
                 placeholder="Enter WTRAK01 or Dealer ID"
                 value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setCouponCode(e.target.value.toUpperCase())
+                  setIsCouponApplied(false)
+                  setAppliedCouponMeta(null)
+                  setCouponMsg({ text: '', type: '' })
+                }}
                 className="coupon-input"
                 required
               />
-              <button type="button" className="coupon-apply-btn" onClick={handleApplyCoupon}>
+              <button type="button" className="coupon-apply-btn" onClick={() => handleApplyCoupon()}>
                 APPLY
               </button>
             </div>

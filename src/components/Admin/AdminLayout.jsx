@@ -45,6 +45,7 @@ const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('rakshak_admin_theme') || 'dark')
+  const [topbarActions, setTopbarActions] = useState(null)
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
@@ -79,6 +80,12 @@ const AdminLayout = () => {
     }
   }, [admin])
 
+  useEffect(() => {
+    if (activeTab !== 'partners') {
+      setTopbarActions(null)
+    }
+  }, [activeTab])
+
   if (!admin) return <AdminLogin onLogin={setAdmin} />
 
   const isSuperAdmin = admin.role === 'Super Admin'
@@ -92,7 +99,7 @@ const AdminLayout = () => {
       case 'sales': return <SalesPanel />
       case 'users': return <CustomerManagement />
       case 'finance': return <FinancePanel />
-      case 'partners': return <PartnerManagement />
+      case 'partners': return <PartnerManagement setTopbarActions={setTopbarActions} />
       case 'access': return <AdminManagement currentAdmin={admin} />
       case 'control': return <ControlPanel />
       case 'security': return <SecurityPanel />
@@ -148,12 +155,18 @@ const AdminLayout = () => {
             <img src={logoImg} alt="Rakshak" className="adm-topbar-logo adm-mobile-show" />
             <h3 className="adm-page-title">{NAV_ITEMS.find(n => n.id === activeTab)?.label}</h3>
           </div>
-          <div className="adm-topbar-right">
-            <button className="adm-theme-toggle" onClick={toggleTheme}>
-              {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
-            </button>
-            <span className="adm-admin-badge">{admin.name?.split(' ')[0] || 'Admin'}</span>
-            <button className="adm-logout-btn-mobile" onClick={handleLogout}><LogoutOutlined /></button>
+          <div className={`adm-topbar-right ${activeTab === 'partners' ? 'is-partner-controls' : ''}`}>
+            {activeTab === 'partners' && topbarActions ? (
+              topbarActions
+            ) : (
+              <>
+                <button className="adm-theme-toggle" onClick={toggleTheme}>
+                  {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+                </button>
+                <span className="adm-admin-badge">{admin.name?.split(' ')[0] || 'Admin'}</span>
+                <button className="adm-logout-btn-mobile" onClick={handleLogout}><LogoutOutlined /></button>
+              </>
+            )}
           </div>
         </header>
 
