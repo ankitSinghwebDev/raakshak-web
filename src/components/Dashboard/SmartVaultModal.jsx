@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import toast from 'react-hot-toast'
-import { ref as storageRef, uploadBytes, getBytes, deleteObject } from 'firebase/storage'
+import { ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { db, ref, get, set, update, storage, auth, functions, httpsCallable, signInWithCustomToken } from '../../config/firebase'
 import { useAppContext } from '../../context/AppContext'
 import PasswordInput from '../ui/PasswordInput'
@@ -49,7 +49,10 @@ const SmartVaultModal = ({ open, onClose }) => {
   const [vaultMeta, setVaultMeta] = useState({ documents: {} })
   const [vaultKey, setVaultKey] = useState(null)
   const [uploadingDoc, setUploadingDoc] = useState('')
+  const [uploadProgress, setUploadProgress] = useState({ percent: 0, elapsed: 0 })
   const [openingDoc, setOpeningDoc] = useState('')
+  const [openElapsed, setOpenElapsed] = useState(0)
+  const [preview, setPreview] = useState(null)
   const fileInputsRef = useRef({})
 
   const documents = useMemo(() => vaultMeta.documents || {}, [vaultMeta.documents])
@@ -57,8 +60,16 @@ const SmartVaultModal = ({ open, onClose }) => {
   const signInForVault = useCallback(async (customerKey, vaultPin) => {
     const mintVaultToken = httpsCallable(functions, 'mintVaultToken')
     const { data } = await mintVaultToken({ customerKey, pin: vaultPin })
-    await signInWithCustomToken(auth, data.token)
+    const cred = await signInWithCustomToken(auth, data.token)
+    return cred.user
   }, [])
+
+  const ensureVaultAuth = useCallback(async () => {
+    if (auth.currentUser && auth.currentUser.uid === currentUser?.key) {
+      return auth.currentUser
+    }
+    throw new Error('Vault session expired. Please re-enter your PIN.')
+  }, [currentUser?.key])
 
   useEffect(() => {
     if (!open || !currentUser?.key) return
@@ -93,7 +104,15 @@ const SmartVaultModal = ({ open, onClose }) => {
     setVaultKey(null)
   }, [open, currentUser?.key])
 
+  const closePreview = useCallback(() => {
+    setPreview((prev) => {
+      if (prev?.url) URL.revokeObjectURL(prev.url)
+      return null
+    })
+  }, [])
+
   const handleClose = useCallback(() => {
+    closePreview()
     setScreen('auth')
     setMobile('')
     setPin('')
@@ -103,7 +122,7 @@ const SmartVaultModal = ({ open, onClose }) => {
     setUploadingDoc('')
     setOpeningDoc('')
     onClose()
-  }, [onClose])
+  }, [onClose, closePreview])
 
   const persistVaultMeta = useCallback(async (patch) => {
     const nextVaultMeta = {
@@ -244,20 +263,38 @@ const SmartVaultModal = ({ open, onClose }) => {
     }
 
     setUploadingDoc(docKey)
+    setUploadProgress({ percent: 0, elapsed: 0 })
+    const startTime = Date.now()
+    const elapsedInterval = setInterval(() => {
+      setUploadProgress((prev) => ({ ...prev, elapsed: Date.now() - startTime }))
+    }, 100)
+
     try {
+      await ensureVaultAuth()
       const encryptedFile = await encryptVaultFile(file, vaultKey)
       const safeName = sanitizeFileName(file.name)
       const storagePath = `vault/${currentUser.key}/${docKey}/${Date.now()}-${safeName}.enc`
       const docStorageRef = storageRef(storage, storagePath)
 
-      await uploadBytes(docStorageRef, encryptedFile.encryptedBytes, {
-        contentType: 'application/octet-stream',
-        customMetadata: {
-          docType: docKey,
-          encrypted: 'true',
-          ownerKey: currentUser.key,
-          originalName: safeName,
-        },
+      await new Promise((resolve, reject) => {
+        const uploadTask = uploadBytesResumable(docStorageRef, encryptedFile.encryptedBytes, {
+          contentType: 'application/octet-stream',
+          customMetadata: {
+            docType: docKey,
+            encrypted: 'true',
+            ownerKey: currentUser.key,
+            originalName: safeName,
+          },
+        })
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+            setUploadProgress((prev) => ({ ...prev, percent }))
+          },
+          reject,
+          resolve
+        )
       })
 
       const previousDoc = documents[docKey]
@@ -281,9 +318,14 @@ const SmartVaultModal = ({ open, onClose }) => {
       toast.success('Document encrypted and uploaded.')
     } catch (uploadError) {
       console.error('Vault upload error:', uploadError)
-      toast.error('Upload failed. Please try again.')
+      const msg = uploadError?.code === 'storage/unauthorized'
+        ? 'Vault session expired. Close the modal and re-enter your PIN.'
+        : uploadError?.message || 'Upload failed. Please try again.'
+      toast.error(msg)
     } finally {
+      clearInterval(elapsedInterval)
       setUploadingDoc('')
+      setUploadProgress({ percent: 0, elapsed: 0 })
     }
   }
 
@@ -292,8 +334,18 @@ const SmartVaultModal = ({ open, onClose }) => {
     if (!doc || !vaultKey) return
 
     setOpeningDoc(docKey)
+    setOpenElapsed(0)
+    const openStart = Date.now()
+    const openInterval = setInterval(() => {
+      setOpenElapsed(Date.now() - openStart)
+    }, 100)
+
     try {
-      const encryptedBytes = await getBytes(storageRef(storage, doc.storagePath))
+      await ensureVaultAuth()
+      const downloadUrl = await getDownloadURL(storageRef(storage, doc.storagePath))
+      const response = await fetch(downloadUrl)
+      if (!response.ok) throw new Error(`Fetch failed: ${response.status}`)
+      const encryptedBytes = await response.arrayBuffer()
       const decryptedBuffer = await decryptVaultFile(encryptedBytes, doc.iv, vaultKey)
       const blob = new Blob([decryptedBuffer], {
         type: doc.contentType || 'application/octet-stream',
@@ -305,16 +357,24 @@ const SmartVaultModal = ({ open, onClose }) => {
         anchor.href = objectUrl
         anchor.download = doc.fileName || `${docKey}.bin`
         anchor.click()
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000)
       } else {
-        window.open(objectUrl, '_blank', 'noopener,noreferrer')
+        setPreview({
+          url: objectUrl,
+          contentType: doc.contentType,
+          fileName: doc.fileName || docKey,
+        })
       }
-
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000)
     } catch (openError) {
       console.error('Vault fetch error:', openError)
-      toast.error('Unable to decrypt this document.')
+      const msg = openError?.code === 'storage/unauthorized'
+        ? 'Vault session expired. Close the modal and re-enter your PIN.'
+        : openError?.message || 'Unable to decrypt this document.'
+      toast.error(msg)
     } finally {
+      clearInterval(openInterval)
       setOpeningDoc('')
+      setOpenElapsed(0)
     }
   }
 
@@ -498,6 +558,61 @@ const SmartVaultModal = ({ open, onClose }) => {
           </div>
         )}
       </div>
+
+      {(uploadingDoc || openingDoc) && (
+        <div className="sv-loader-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="sv-loader-card">
+            <div className="sv-loader-ring" />
+            <p className="sv-loader-title">
+              {uploadingDoc ? 'Encrypting & uploading…' : 'Fetching & decrypting…'}
+            </p>
+            {uploadingDoc && (
+              <>
+                <div className="sv-loader-bar">
+                  <div className="sv-loader-bar-fill" style={{ width: `${uploadProgress.percent}%` }} />
+                </div>
+                <p className="sv-loader-meta">
+                  {uploadProgress.percent}% • {(uploadProgress.elapsed / 1000).toFixed(1)}s
+                </p>
+              </>
+            )}
+            {openingDoc && (
+              <p className="sv-loader-meta">{(openElapsed / 1000).toFixed(1)}s</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {preview && (
+        <div className="sv-preview-overlay" onClick={(e) => { e.stopPropagation(); closePreview() }}>
+          <div className="sv-preview-content" onClick={(e) => e.stopPropagation()}>
+            <div className="sv-preview-header">
+              <span className="sv-preview-title">{preview.fileName}</span>
+              <button className="sv-preview-close" onClick={closePreview} aria-label="Close preview">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="13" y2="13" />
+                  <line x1="13" y1="1" x2="1" y2="13" />
+                </svg>
+              </button>
+            </div>
+            <div className="sv-preview-body">
+              {preview.contentType === 'application/pdf' ? (
+                <iframe
+                  src={preview.url}
+                  title={preview.fileName}
+                  className="sv-preview-iframe"
+                />
+              ) : (
+                <img
+                  src={preview.url}
+                  alt={preview.fileName}
+                  className="sv-preview-image"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

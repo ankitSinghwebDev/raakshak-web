@@ -318,3 +318,233 @@
     font-size: 10px;
   }
 }
+
+/* Loader Overlay (upload/fetch) */
+.sv-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sv-loader-card {
+  background: #111;
+  border: 1px solid rgba(242, 140, 56, 0.3);
+  border-radius: 16px;
+  padding: 32px 36px;
+  min-width: 280px;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+}
+
+.sv-loader-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(242, 140, 56, 0.15);
+  border-top-color: #F28C38;
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  animation: sv-spin 0.9s linear infinite;
+}
+
+@keyframes sv-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sv-loader-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  letter-spacing: 0.3px;
+}
+
+.sv-loader-bar {
+  width: 100%;
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.sv-loader-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F28C38, #ff6a00);
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.sv-loader-meta {
+  color: #F28C38;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .sv-loader-card {
+    min-width: 0;
+    width: 100%;
+    padding: 28px 24px;
+  }
+}
+
+/* Preview Overlay */
+.sv-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sv-preview-content {
+  background: #111;
+  border: 1px solid rgba(242, 140, 56, 0.3);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1100px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+}
+
+.sv-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #222;
+  background: #0a0a0a;
+}
+
+.sv-preview-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 16px;
+}
+
+.sv-preview-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #333;
+  color: #aaa;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  flex-shrink: 0;
+}
+
+.sv-preview-close:hover {
+  background: #F28C38;
+  color: #000;
+  border-color: #F28C38;
+}
+
+.sv-preview-body {
+  flex: 1;
+  overflow: auto;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sv-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #fff;
+}
+
+.sv-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .sv-preview-overlay {
+    padding: 0;
+  }
+
+  .sv-preview-content {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .sv-preview-header {
+    padding: 12px 16px;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  .sv-preview-title {
+    font-size: 13px;
+    margin-right: 12px;
+  }
+
+  .sv-preview-close {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sv-preview-body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .sv-preview-image {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sv-preview-header {
+    padding: 10px 12px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+
+  .sv-preview-title {
+    font-size: 12px;
+  }
+
+  .sv-preview-close {
+    width: 36px;
+    height: 36px;
+  }
+}

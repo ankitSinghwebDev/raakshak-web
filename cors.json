@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:5173", "https://raakshak-web-delta.vercel.app", "https://rakshak.co.in"],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization", "x-goog-*"],
+    "maxAgeSeconds": 3600
+  }
+]
