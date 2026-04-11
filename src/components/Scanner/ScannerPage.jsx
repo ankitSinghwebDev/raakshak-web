@@ -175,6 +175,7 @@ const ScannerPage = () => {
 
     setSending(true)
     try {
+      // Step 1: push the scan message (this is the critical one — owner notification)
       const scanRef = ref(db, `scans/${userKey}`)
       await push(scanRef, {
         message: msg.label,
@@ -183,11 +184,15 @@ const ScannerPage = () => {
         timestamp: new Date().toISOString(),
       })
 
-      // Also update scan count on customer
-      const customerRef = ref(db, `customers/${userKey}`)
-      const snap = await get(customerRef)
-      const currentScans = snap.val()?.totalScans || 0
-      await set(ref(db, `customers/${userKey}/totalScans`), currentScans + 1)
+      // Step 2: update scan counter (best-effort — don't fail the send if blocked by rules)
+      try {
+        const customerRef = ref(db, `customers/${userKey}`)
+        const snap = await get(customerRef)
+        const currentScans = snap.val()?.totalScans || 0
+        await set(ref(db, `customers/${userKey}/totalScans`), currentScans + 1)
+      } catch (counterErr) {
+        console.warn('totalScans update failed (non-fatal):', counterErr)
+      }
 
       recordScan()
       activateCooldown()
@@ -251,6 +256,13 @@ const ScannerPage = () => {
     return (
       <div className="scan-page">
         <div className="scan-card">
+          <Link to="/" className="scan-home-btn" aria-label="Go to home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12l9-9 9 9" />
+              <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+            </svg>
+            HOME
+          </Link>
           <div className="scan-logo-wrap">
             <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak" className="scan-logo" />
           </div>
@@ -272,6 +284,13 @@ const ScannerPage = () => {
   return (
     <div className="scan-page">
       <div className="scan-card">
+        <Link to="/" className="scan-home-btn" aria-label="Go to home">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12l9-9 9 9" />
+            <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+          </svg>
+          HOME
+        </Link>
         {/* Header */}
         <div className="scan-logo-wrap">
           <img src="https://i.postimg.cc/yYyX0Mt7/Chat-GPT-Image-Feb-27-2026-11-52-07-PM.png" alt="Rakshak" className="scan-logo" />

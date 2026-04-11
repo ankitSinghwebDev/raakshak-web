@@ -463,11 +463,11 @@ const UserDashboard = () => {
       {/* ===== QR STICKER (FASTag Style) ===== */}
       <section className="db-section">
         <h3 className="db-section-title">Your Rakshak QR Sticker</h3>
-        {!isPublicSiteUrlHealthy() && (
+        {/* {!isPublicSiteUrlHealthy() && (
           <div className="db-qr-warning">
             ⚠️ QR codes point to <strong>{new URL(qrLink).origin}</strong> but this app is on <strong>{window.location.origin}</strong>. Scans will fail until that domain resolves here. Update <code>VITE_PUBLIC_SITE_URL</code> on Vercel or connect the custom domain.
           </div>
-        )}
+        )} */}
         <div className="db-sticker-layout">
           <div className="db-sticker-panel">
             <div className="db-sticker">

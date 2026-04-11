@@ -17,10 +17,43 @@
   background: rgba(15, 15, 15, 0.95);
   border: 1px solid rgba(255, 0, 0, 0.12);
   border-radius: 24px;
-  padding: 28px 20px;
+  padding: 52px 20px 28px;
   text-align: center;
   box-shadow: 0 0 30px rgba(255, 0, 0, 0.04), 0 30px 60px rgba(0, 0, 0, 0.5);
   animation: scanCardIn 0.4s ease-out;
+  position: relative;
+}
+
+.scan-home-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(242, 140, 56, 0.1);
+  border: 1px solid rgba(242, 140, 56, 0.35);
+  border-radius: 20px;
+  color: #F28C38;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  transition: all 0.2s;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scan-home-btn:hover,
+.scan-home-btn:active {
+  background: rgba(242, 140, 56, 0.18);
+  border-color: #F28C38;
+  transform: translateY(-1px);
+}
+
+.scan-home-btn svg {
+  flex-shrink: 0;
 }
 
 @keyframes scanCardIn {
